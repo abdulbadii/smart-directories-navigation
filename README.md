@@ -4,7 +4,7 @@ It must be inside ~/.bashrc to get the executable g, stand for get into, functio
 simply rename function name g with whatever you like; j (stand for jump into), b (stand for be in), etc    
 
 # Usage   
-Note all the go to a dir. uses, i.e. not removing one, the very first step: save the current dir. at top of dir. stack, is implied before any step explicitly written, except g 1 usage   
+Note that every "go to a dir." uses, i.e. not its removal, the very first step: "save the current dir. at top of dir. stack" is implied before any step explicitly written, except g 1 usage   
 
 g   
 go to $HOME dir.   
@@ -15,7 +15,7 @@ go back to the last dir. you went from which is 1st index of dir. stack (as oppo
 g .   
 go to the earliest dir. which is the deepest dir. of dir. stack   
 
-g 0
+g 0   
 go to the earliest dir. and reverse the dir. index order
 
 g {nth}   
