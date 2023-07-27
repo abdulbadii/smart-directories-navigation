@@ -1,6 +1,6 @@
 # smart-directories-navigation
-Bash smart directories navigation
-go or get into a directory keeping the previous directory saved, listed neatly right off on shell
+### Bash smart directories navigation   
+Go or get into a directory keeping the previous directory saved, listed neatly right off on shell   
 It must be inside ~/.bashrc to get the executable g, stand for get into, function working directly, nicely, fast in shell terminal and no DIRS shell variable else being used    
 simply rename function name g with whatever you like; j (stand for jump into), b (stand for be in), etc    
 
