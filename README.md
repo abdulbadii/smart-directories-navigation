@@ -27,16 +27,16 @@ go to dir. pointed by the top of stack and remove the current directory, use g -
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
 
-g foo bar   
+g foo bar...   
 go to first of the listed dir. given, foo, while the rest of list is put in dir. stack    
 
-g {0nth}...  
+g 0{nth}...  
 remove every given nth index of dir. stack   
 
-g {0nth-}  
+g 0{nth}-  
 remove the nth index and every dir. greater than nth index of dir. stack   
 
-g {0nth-Nth}  
+g 0{nth}-{Nth}  
 remove every dir. index in the range nth to Nth index of dir. stack   
 
 g 00   
