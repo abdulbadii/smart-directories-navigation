@@ -1,10 +1,10 @@
 # Bash smart directories navigation   
-Go or get into a directory keeping the previous directory saved, listed neatly right off on shell   
+Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
 It must be inside ~/.bashrc to get the executable g, stand for get into, function working directly, nicely, fast in shell terminal and no DIRS shell variable else being used    
 simply rename function name g with whatever you like; j (stand for jump into), b (stand for be in), etc    
 
 # Usage   
-Note that every "go to a dir." uses, i.e. not its removal, the very first step: "save the current dir. at top of dir. stack" is implied before any step explicitly written, except g 1 usage   
+Note that every "go to a dir." uses, i.e. not its removal, the very first step: "save the current dir. at top of dir. stack" is implied before any step explicitly written, except `g 1` usage   
 
 g   
 go to $HOME dir.   
