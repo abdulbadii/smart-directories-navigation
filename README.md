@@ -22,7 +22,7 @@ g {nth}
 go to the nth index of dir. stack, exception is index 1 by g 1 below
 
 g 1   
-go to dir. pointed by the top of stack and remove the current directory, use g -otherwise to keep current dir at top of dir. stack    
+go to dir. pointed by the top of stack and remove the current directory, use `g -` otherwise to keep current dir at top of dir. stack    
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
