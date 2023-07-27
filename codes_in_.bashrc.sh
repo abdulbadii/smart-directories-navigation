@@ -21,16 +21,17 @@ case $1 in
  fi;;
 $PWD) return;;
 ?*)
- CD=$PWD
  i=$#
- while ((i)) ;do
-  eval "n=\${$((i--))}"
-  if [[ $n = /* ]] ;then [[ -d $n ]] &&pushd "$n" 
-  else [[ -d $CD/$n ]] &&pushd "$CD/$n"
-  fi
- done;;
-*) [[ $HOME = $PWD ]] && return
-  pushd ~
+ if ((i>1)) ;then
+  CD=$PWD
+  while ((i)) ;do
+   eval "n=\${$((i--))}"
+   if [[ $n = /* ]] ;then [[ -d $n ]] &&pushd "$n" 
+   else [[ -d $CD/$n ]] &&pushd "$CD/$n";fi
+  done
+  pushd -0;pushd ~-
+ else pushd $1;fi;;
+*) [[ $HOME = $PWD ]] &&return; pushd ~
 esac
 IFS=$'\n'
 l=`dirs -l -p`
