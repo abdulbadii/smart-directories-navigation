@@ -13,10 +13,10 @@ g -
 go back to the last dir. you went from which is 1st index of dir. stack (as opposed to g 1 below)   
 
 g .   
-go to the earliest dir. which is the deepest dir. of dir. stack   
+go to the earliest dir. which is the deepest dir. on dir. stack   
 
 g 0   
-go to the earliest dir. and reverse the dir. index order
+reverse the dir. index order and get into the earliest dir.   
 
 g {nth}   
 go to the nth index of dir. stack, exception is index 1 by g 1 below
