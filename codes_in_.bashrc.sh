@@ -3,9 +3,11 @@ g(){
 case $1 in
 .)	pushd -0;;
 -)	pushd ~-;;
-0)	popd 2>/dev/null ;;
-0[1-9]-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
-0[1-9]) i=;for n;{ popd +$((n-i++)) 2>/dev/null ||break;};;
+1)	popd 2>/dev/null ;;
+0) set -- ${DIRSTACK[@]}; for i;{ pushd "$i" ;};;
+0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
+0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
+0[1-9]*) i=;for n;{ [[ $n = 0[1-9] ]] ||break; popd +$((n-i++)) 2>/dev/null ||break;};;
 00) dirs -c;DIRS=;return;;
 [1-9]/|[1-9][0-9]/) pushd "${1%?}";;
 [1-9]|[1-9][0-9])
