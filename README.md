@@ -42,4 +42,7 @@ remove every dir. index in the range nth to Nth index of dir. stack
 g 00   
 clean up all dir. stack   
 
+g <Bash CLI>
+Any CLI executable, its argument may be obtained from the dir. stack by indexing it 
+
 
