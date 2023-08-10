@@ -42,7 +42,6 @@ remove every dir. index in the range nth to Nth index of dir. stack
 g 00   
 clean up all dir. stack   
 
-g <Bash CLI>
+g \<Bash command line\>   
 Any CLI executable, its argument may be obtained from the dir. stack by index reference
-In purpose of get more selection of that dir, append // at cli so that it won't be immediately executed but instead will get into readline. ready to do completion job
-
+In purpose of get more selection of that dir, append // at CLI so that it won't be immediately executed, but instead it will get into readline, is ready to do what Bash command prompt is, e.g. auto completion, etc
