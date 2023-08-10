@@ -4,7 +4,7 @@ case $1 in
 .)	pushd -0;;
 -)	pushd ~-;;
 $PWD) :;;
-1) popd 2>/dev/null;;
+1)	popd 2>/dev/null;;
 0) set -- ${DIRSTACK[@]}; for i;{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -19,8 +19,7 @@ $PWD) :;;
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
 ?*)
- [[ $1 = */ ]] ||{
-  type -a "$1" 2>/dev/null&&{
+ type -a "$1" 2>/dev/null&&{
    F=1
    [[ -d $1 ]] &&{
     echo "'$1' is a directory in the working dir. but it's a name of an executable too"
@@ -34,21 +33,29 @@ $PWD) :;;
       f=${BASH_REMATCH[1]}
       n=${BASH_REMATCH[2]}
       b=${BASH_REMATCH[3]}
-      if [[ $b =~ ^//|^/$ ]] ;then dirn=$f$n${b%/}
-       [[ -d $dirn ]] ||{ echo "Cannot stat '$dirn'";return 1;}
+      if [[ $b =~ ^//.|[^/]/$ ]] ;then
+       dirn=$f$n${b%/}
+       [[ -d $dirn ]] ||{ echo "Cannot stat '$dirn'">$2;return 1;}
        args=$args\ $dirn
       else
-       if ((n>${#DIRSTACK[@]})) && [[ -d $m ]] ;then
-        echo " '$n' in '$m' path is refered to real directory not dir. stack index"
+       dirn=$f${DIRSTACK[$n]}${b%//}
+       if [[ $b = *// ]] ;then
+        read -ei "$dirn" m
         args=$args\ $m
-       else args=$args\ $f${DIRSTACK[$n]}$b ;fi
+       else
+        if ((n>${#DIRSTACK[@]})) ;then
+         if [[ -d $m ]] ;then
+          echo "'$n' in '$m' path is refered to real directory not dir. stack index"
+          args=$args\ $m
+         else "$n is out of dir. stack range";return 1;fi
+        else args=$args\ $dirn ;fi
+       fi
       fi
      else args=$args\ $m;fi
      }
      eval "$exe $args"
     return;}
- }
- }
+}
  CD=$PWD
  i=$#
  if ((i>1)) ;then
@@ -65,11 +72,11 @@ IFS=$'\n'
 l=`dirs -l -p`
 l=$'\n'${l//$'\n'/$'\n\n'}$'\n'
 unset o d DIRS
-while :;do
-	set -- $l
+while :
+do set -- $l
 	l=${l//$'\n'$1$'\n'}
-	[[ $l ]] || break
-	o="'$1' $o"
+ [[ $l ]] || break
+ o="'$1' $o"
 done
 cd $1
 dirs -c
