@@ -1,10 +1,10 @@
 # Bash smart directories navigation   
 Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
-It must be inside ~/.bashrc to get the executable g, stand for get into, functioning, working directly, nicely, fast in shell terminal and no DIRS shell variable else being used    
-simply rename function name g with whatever you like; j (stand for jump into), b (stand for be in), etc    
+It must be inside ~/.bashrc to get the executable g (stand for get in) functioning, working directly, nicely and fast in shell terminal and no DIRS shell variable else being used    
+Simply rename function name g with whatever you like; j, stand for jump into or b, stand for be in, etc    
 
 # Usage   
-Note that each use to mean: go to a directory, i.e. not its removal of dir. stack, the first process step "save the current directory onto top of dir. stack" is implied before the first one explicitly written, except `g 1` usage   
+Note explanation below that each usage to mean: go to a directory, i.e. not its removal from dir. stack, the first process step "save the current directory onto top of dir. stack" is implied before the first one explicitly written, except the `g 1` usage   
 
 g   
 go to $HOME dir.   
@@ -22,7 +22,7 @@ g {nth}
 go to the nth index of dir. stack, exception is index 1 by g 1 below
 
 g 1   
-go to dir. pointed by the top of stack and remove the current directory, use `g -` otherwise to keep current dir at top of dir. stack    
+go to directory pointed by the top of dir. stack and lose the current directory, use `g -` otherwise to keep current dir at top of dir. stack    
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
@@ -43,5 +43,6 @@ g 00
 clean up all dir. stack   
 
 g \<Bash command line\>   
-Any CLI executable, its argument may be obtained from the dir. stack by index reference
-In purpose of get more selection of that dir, append // at CLI so that it won't be immediately executed, but instead it will get into readline, is ready to do what Bash command prompt is, e.g. auto completion, etc
+Any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
+For the purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which is ready to do what Bash command prompt is, e.g: modify the argument string, (executable) path auto completion, etc
+
