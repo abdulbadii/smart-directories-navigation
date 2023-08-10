@@ -40,8 +40,7 @@ $PWD) :;;
       else
        dirn=$f${DIRSTACK[$n]}${b%//}
        if [[ $b = *// ]] ;then
-        read -ei "$dirn" m
-        args=$args\ $m
+        echo -n $exe >&2;read -ei "$args $dirn" args
        else
         if ((n>${#DIRSTACK[@]})) ;then
          if [[ -d $m ]] ;then
@@ -87,5 +86,5 @@ while read l;do
  d="$d \e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m"
 done
 }< <(dirs -v);
-[ -n "$d" ] && export DIRS="${d# }\n\r"
+[[ $d ]] && export DIRS="${d# }\n\r"
 }>/dev/null
