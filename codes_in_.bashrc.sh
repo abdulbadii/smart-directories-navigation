@@ -27,9 +27,10 @@ $PWD) :;;
     [[ $o = d ]] && F=
    }
    ((F)) &&{
-    exe=$1;args=;shift
+    exe=$1;args=;DNO=;shift
     for m;{
-     if [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
+     [[ $m = -- ]] && DNO=1
+     if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
       f=${BASH_REMATCH[1]}
       n=${BASH_REMATCH[2]}
       b=${BASH_REMATCH[3]}
