@@ -1,10 +1,10 @@
 # Bash smart directories navigation   
 Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
-It must be inside ~/.bashrc to get the executable g, stand for get into, function working directly, nicely, fast in shell terminal and no DIRS shell variable else being used    
+It must be inside ~/.bashrc to get the executable g, stand for get into, functioning, working directly, nicely, fast in shell terminal and no DIRS shell variable else being used    
 simply rename function name g with whatever you like; j (stand for jump into), b (stand for be in), etc    
 
 # Usage   
-Note that every "go to a dir." uses, i.e. not its removal, the first process step "save the current dir. at top of dir. stack" is implied before any step explicitly written, except `g 1` usage   
+Note that each use to mean: go to a directory, i.e. not its removal of dir. stack, the first process step "save the current directory onto top of dir. stack" is implied before the first one explicitly written, except `g 1` usage   
 
 g   
 go to $HOME dir.   
@@ -34,7 +34,7 @@ g 0{nth}...
 remove every given nth index of dir. stack   
 
 g 0{nth}-  
-remove the nth index and every dir. greater than nth index of dir. stack   
+remove the nth index and every dir. greater than it of dir. stack   
 
 g 0{nth}-{Nth}  
 remove every dir. index in the range nth to Nth index of dir. stack   
@@ -43,6 +43,6 @@ g 00
 clean up all dir. stack   
 
 g <Bash CLI>
-Any CLI executable, its argument may be obtained from the dir. stack by indexing it 
-
+Any CLI executable, its argument may be obtained from the dir. stack by index reference
+In purpose of get more selection of that dir, append // at cli so that it won't be immediately executed but instead will get into readline. ready to do completion job
 
