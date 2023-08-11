@@ -1,10 +1,9 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
 case $1 in
-.)	pushd -0;;
--)	pushd ~-;;
-$PWD) :;;
-1)	popd 2>/dev/null;;
+.) pushd -0;;
+-) pushd ~-;;
+1) popd 2>/dev/null;;
 0) set -- ${DIRSTACK[@]}; for i;{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -18,6 +17,7 @@ $PWD) :;;
  if 2>/dev/null pushd ${DIRSTACK[$1]};then echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
+$PWD) :;;
 ?*)
  type -a "$1" 2>/dev/null&&{
    F=1
