@@ -41,7 +41,7 @@ $PWD) :;;
       else
         if ((n<=${#DIRSTACK[@]})) ;then
          dirn=$f${DIRSTACK[$n]}
-         if [[ $m = *// ]] ;then echo -n $exe>&2;read -ei "$args $dirn" args
+         if [[ $m = */ ]] ;then echo -n $exe>&2;read -ei "$args $dirn" args
          else args=$args\ $dirn$b;fi
        else
          echo -n "In '$m', $n is out of dir. stack range"
