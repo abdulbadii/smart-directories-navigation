@@ -3,7 +3,7 @@ g(){
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
-1) popd 2>/dev/null;;
+1)	popd 2>/dev/null;;
 0) set -- ${DIRSTACK[@]}; for i;{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -23,8 +23,8 @@ $PWD) :;;
    F=1
    [[ -d $1 ]] &&{
     echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-    read -pN1 'Which one is it meant, a directory or an executable (append '/' on CLI to mean it directory)? (d/x) ' o
-    [[ $o = d ]] && F=
+    read -N1 -p 'Is it meant as executable or a directory name (which next time append '/' to it on CLI)? (d / ELSE KEY) ' o
+    [[ $o = [dD] ]] && F=
    }
    ((F)) &&{
     exe=$1;args=;DNO=;shift
@@ -34,23 +34,25 @@ $PWD) :;;
       f=${BASH_REMATCH[1]}
       n=${BASH_REMATCH[2]}
       b=${BASH_REMATCH[3]}
-      if [[ $b =~ ^//.|[^/]/$ ]] ;then
-       dirn=$f$n${b%/}
-       [[ -d $dirn ]] ||{ echo "Cannot stat '$dirn'">$2;return 1;}
+      if [[ $b =~ ^//.|^/$ ]] ;then
+       b=${b#/};dirn=$f$n${b%/}
+       [[ -d $dirn ]] ||{ echo "Cannot stat '$dirn'">&2;return 1;}
        args=$args\ $dirn
       else
-       dirn=$f${DIRSTACK[$n]}${b%//}
-       if [[ $b = *// ]] ;then
-        echo -n $exe >&2;read -ei "$args $dirn" args
+        if ((n<=${#DIRSTACK[@]})) ;then
+         dirn=$f${DIRSTACK[$n]}
+         if [[ $m = *// ]] ;then echo -n $exe>&2;read -ei "$args $dirn" args
+         else args=$args\ $dirn$b;fi
        else
-        if ((n>${#DIRSTACK[@]})) ;then
+         echo -n "In '$m', $n is out of dir. stack range"
          if [[ -d $m ]] ;then
-          echo "'$n' in '$m' path is refered to real directory not dir. stack index"
+          echo -e " while it's an existing directory\nIf it's really meant append '/' on CLI: '$f$n/$b'"
+          read -N1 -p "So proceed with '$n' treated as the directory? (y / ELSE KY)" o
+          [[ $o = [yY] ]] ||return 1
           args=$args\ $m
-         else "$n is out of dir. stack range";return 1;fi
-        else args=$args\ $dirn ;fi
+         else return 1;fi
+        fi
        fi
-      fi
      else args=$args\ $m;fi
      }
      eval "$exe $args"
