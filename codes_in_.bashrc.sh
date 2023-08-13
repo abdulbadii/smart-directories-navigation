@@ -1,5 +1,9 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
+eval "n=\$$#"
+[[ $n = *, ]] &&{ ((HIDIRF=1-HIDIRF))
+ (($#>1)) &&set -- ${@:1:(($#-1))}
+}
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
@@ -17,9 +21,10 @@ case $1 in
  if 2>/dev/null pushd ${DIRSTACK[$1]};then echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
-$PWD) :;;
+$PWD);;
+,);;
 ?*)
- type -a "$1" 2>/dev/null&&{
+ if type -a "$1" 2>/dev/null;then
    F=1
    [[ -d $1 ]] &&{
     echo "'$1' is a directory in the working dir. but it's a name of an executable too"
@@ -47,7 +52,7 @@ $PWD) :;;
          echo -n "In '$m', $n is out of dir. stack range"
          if [[ -d $m ]] ;then
           echo -e " while it's an existing directory\nIf it's really meant append '/' on CLI: '$f$n/$b'"
-          read -N1 -p "So proceed with '$n' treated as the directory? (y / ELSE KY)" o
+          read -N1 -p "So proceed with '$n' treated as the directory? (y / ELSE KEY)" o
           [[ $o = [yY] ]] ||return 1
           args=$args\ $m
          else return 1;fi
@@ -56,21 +61,22 @@ $PWD) :;;
      else args=$args\ $m;fi
      }
      eval "$exe $args"
-    return;}
-}
- CD=$PWD
- i=$#
- if ((i>1)) ;then
-  while ((i)) ;do
-   eval "n=\${$((i--))}"
-   if [[ $n = /* ]] ;then [[ -d $n ]] &&pushd "$n" 
-   else [[ -d $CD/$n ]] &&pushd "$CD/$n";fi
-  done
-  pushd -0;pushd ~-
- else pushd $1 ;fi;;
-*) [[ $HOME = $PWD ]] || pushd ~
+    }
+else
+  C=$PWD
+  i=$#
+  if ((i>1)) ;then
+   while ((i)) ;do
+    eval "n=\${$((i--))}"
+    if [[ $n = /* ]] ;then [[ -d $n ]] &&pushd "$n" 
+    else [[ -d $C/$n ]] &&pushd "$C/$n";fi
+   done
+   pushd -0;pushd ~-
+  else pushd $1;fi
+fi;;
+*) [[ $HOME = $PWD ]] ||pushd ~
 esac
-IFS=$'\n'
+ IFS=$'\n'
 l=`dirs -l -p`
 l=$'\n'${l//$'\n'/$'\n\n'}$'\n'
 unset o d DIRS
@@ -82,12 +88,16 @@ do set -- $l
 done
 cd $1
 dirs -c
-unset IFS;eval set -- $o;for i ;{ pushd "$i" ;}
-{ read l
-while read l;do
- [[ $l =~ ^([1-9]+)\ +(.+) ]]
- d="$d \e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m"
-done
+unset IFS C;eval set -- $o
+for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
+ [[ $C ]]&&echo "Directory stack is wthout just removed'${C// /,}'">&2
+{
+ read l
+ while read l
+ do [[ $l =~ ^([1-9]+)\ +(.+) ]]
+  d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
+ done
 }< <(dirs -v);
-[[ $d ]] && export DIRS="${d# }\n\r"
+DIRS=
+((HIDIRF)) ||export DIRS=$(echo -e "${d:+$d\n\r}")
 }>/dev/null
