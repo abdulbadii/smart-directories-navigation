@@ -46,3 +46,9 @@ g \<Bash command line\>
 Any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
 For the purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which is ready to do what Bash command prompt is, e.g: modify the argument string, (executable) path auto completion, etc
 
+g [optionally any command]   
+Toggle hide or show the directory stack list ouput at prompt string   
+If there is any command, execute it first before the hiding   
+Naturally except a mere `m`, in which `m -` just toggle hide or show the directory stack list,    
+not perform go into $HOME directory first 
+
