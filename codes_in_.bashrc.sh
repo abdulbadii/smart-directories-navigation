@@ -29,35 +29,32 @@ $PWD) DIRS=;return;;
    [[ -d $1 ]] &&{
     echo "'$1' is a directory in the working dir. but it's a name of an executable too"
     read -N1 -p 'Is it meant as executable or a directory name (which next time append '/' to it on CLI)? (d / ELSE KEY) ' o
-    [[ $o = [dD] ]] && F=
+    [[ $o = [dD] ]] &&{ pushd $1;F=;}
    }
    ((F)) &&{
-    x=$1;args=;DNO=;shift
-    if [[ $1 = - ]];then args=$args\ $PWD;shift
-    elif [[ $1 = . ]];then args=$args\ ${DIRSTACK[@]: -1};shift
-    fi
+    x=$1;shift;args=;DNO=
+    [[ $1 = . ]] &&{ args= ${DIRSTACK[@]: -1};shift;}
     for m;{
      [[ $m = -- ]] && DNO=1
-     if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
+     if [[ $m =~ ^-(/.*)? ]];then b=${BASH_REMATCH[1]}
+      if [[ $m = */ ]] ;then echo -n $x>&2;read -ei "$args ~-$b" args
+      else args=$args\ ~-$b;fi
+     elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
       f=${BASH_REMATCH[1]}
       n=${BASH_REMATCH[2]}
       b=${BASH_REMATCH[3]}
       if [[ $b =~ ^//.|^/$ ]] ;then
-       b=${b/\/\//\/};dirn=$f$n${b%/}
-       args=$args\ $dirn
+       b=${b/\/\//\/}
+       args=$args\ $f$n${b%/}
       else
         if ((n<=${#DIRSTACK[@]})) ;then
-         dirn=$f${DIRSTACK[n]}
+         dirn=$f${DIRSTACK[n]}$b
          if [[ $m = */ ]] ;then echo -n $x>&2;read -ei "$args $dirn" args
-         else args=$args\ $dirn$b;fi
+         else args=$args\ $dirn;fi
        else
          echo -n "In '$m', $n is out of dir. stack range"
-         if [[ -d $m ]] ;then
-          echo -e " while it's an existing directory\nIf it's really meant directory, append '/' on CLI: '$f$n/$b'"
-          read -N1 -p "So proceed with '$n' as directory oy abort? (y / ELSE KEY)" o
-          [[ $o = [yY] ]] ||return 1
-          args=$args\ $m
-         else return 1;fi
+         [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
+         echo -e "\nTo predetermine a number in argument isn't any of dir. stack, append '/' on CLI:\n'$f$n/$b'"
         fi
        fi
      else args=$args\ $m;fi
