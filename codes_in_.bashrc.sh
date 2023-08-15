@@ -20,7 +20,9 @@ case $1 in
  if 2>/dev/null pushd "${DIRSTACK[$1]}";then echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
-,|$PWD);;
+,) DIRS=;((HIDIRF)) || DIRS=$DIRSB
+ return;;
+$PWD) DIRS=;return;;
 ?*)
  if type -a "$1" 2>/dev/null;then
    F=1
@@ -31,6 +33,9 @@ case $1 in
    }
    ((F)) &&{
     x=$1;args=;DNO=;shift
+    if [[ $1 = - ]];then args=$args\ $PWD;shift
+    elif [[ $1 = . ]];then args=$args\ ${DIRSTACK[@]: -1};shift
+    fi
     for m;{
      [[ $m = -- ]] && DNO=1
      if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
@@ -83,7 +88,7 @@ do set -- $l
 done
 cd $1
 dirs -c
-unset IFS C d DIRS
+unset IFS C d
 eval set -- $o
 for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
  [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C// /,}'">&2
@@ -93,6 +98,7 @@ for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
   d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
-}< <(dirs -v);
-((HIDIRF)) ||export DIRS=$(echo -e "${d:+$d\n\r}")
+}< <(dirs -v)
+DIRSB=$(echo -e "${d:+$d\n\r}")
+DIRS=;((HIDIRF)) || DIRS=$DIRSB
 }>/dev/null
