@@ -84,13 +84,12 @@ do set -- $=l
 done
 cd $1
 dirs -c
-unset  C d
 eval set -- $=o
-for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
+W=;for d;{ pushd "$d" 2>/dev/null ||C=$C\ $1;}
  [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C// /,}'">&2
 {
  read l
- while read l
+ d=;while read l
  do [[ $l =~ "^([1-9]+)\h+(.+)" ]]
   d="$d\e[41;1;37m${match[1]}\e[40;1;32m${match[2]}\e[m "
  done
