@@ -7,7 +7,7 @@ DIRST=(${d:1})
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
-1)	popd 2>/dev/null;;
+1) popd 2>/dev/null;;
 0) for i in $DIRST ;{ pushd "$i"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -21,7 +21,10 @@ case $1 in
  if 2>/dev/null pushd "${DIRST[$1]}";then echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2}
  fi;;
-, | $PWD);;
+,) DIRS=;((HIDIRF)) || DIRS=$DIRSB
+ PS1=$(echo -e "$DIRS\e[41;1;37m%~\e[40;1;33m\n%%\e[m ")
+ return;;
+$PWD) DIRS=;return;;
 ?*)
  if type -a "$1" 2>/dev/null;then
    F=1
@@ -32,6 +35,9 @@ case $1 in
    }
    ((F)) &&{
     x=$1;args=;DNO=;shift
+    if [[ $1 = - ]];then args=$args\ $PWD;shift
+    elif [[ $1 = . ]];then args=$args\ ${DIRST: -1};shift
+    fi
     for m;{
      [[ $m = -- ]] && DNO=1
      if [[ $m != -* ]] || ((DNO)) && [[ $m =~ "^([^1-9]*)([1-9][0-9]?)(.*)" ]] ;then
@@ -94,5 +100,7 @@ W=;for d;{ pushd "$d" 2>/dev/null ||C=$C\ $1;}
   d="$d\e[41;1;37m${match[1]}\e[40;1;32m${match[2]}\e[m "
  done
 }< <(dirs -v)
-((HIDIRF)) ||export PROMPT=$(echo -e "${d:+$d\n\r}\e[41;1;37m%~\e[40;1;33m\n%%\e[m ")
+DIRSB=$(echo -e "${d:+$d\n\r}")
+DIRS=;((HIDIRF)) || DIRS=$DIRSB
+PS1=$(echo -e "$DIRS\e[41;1;37m%~\e[40;1;33m\n%%\e[m ")
 }>/dev/null
