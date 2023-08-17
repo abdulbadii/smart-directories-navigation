@@ -53,12 +53,12 @@ $PWD)return;;
        else
          echo -n "In '$m', $n is out of dir. stack range"
          [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
-         echo -e "\nTo predetermine a number in argument isn't any of dir. stack, append '/' on CLI:\n'$f$n/$b'"
+         echo -e "\nTo predetermine a number in argument that isn't a dir. stack index, append '/' on CLI:\n'$f$n/$b'"
         fi
        fi
      else args=$args\ $m;fi
      }
-     eval "$x $args"
+     eval "$x $args">&2
     }
 else
   if (((i=$#)>1)) ;then C=$PWD
