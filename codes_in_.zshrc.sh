@@ -1,4 +1,4 @@
-PS1=$(echo -e "${d:+$d\n\r}\e[41;1;37m%~\e[40;1;33m\n%%\e[m ")
+PS1=$(echo -e "${d:+$d\n\r}\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
 g(){
 [[ ${@:-1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1}}
 IFS=$'\n'
@@ -51,7 +51,7 @@ $PWD)return;;
        args=$args\ $f$n${b%/}
       else
         if ((n<=$#DIRST)) ;then
-         dirn=$f$DIRSTACK[n]$b
+         dirn=$f$DIRST[n]$b
          if [[ $m = */ ]] ;then echo -n $x>&2
          args="$args $dirn"
          vared args
@@ -64,7 +64,7 @@ $PWD)return;;
        fi
      else args=$args\ $m;fi
      }
-     eval "$x $args"
+     eval "$x $args">&2
     }
 else
   if (((i=$#)>1)) ;then C=$PWD
