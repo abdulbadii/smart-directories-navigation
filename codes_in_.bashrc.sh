@@ -32,19 +32,18 @@ $PWD)return;;
    }
    ((F)) &&{
     x=$1;shift;args=;DNO=
-    [[ $1 = . ]] &&{ args= ${DIRSTACK[@]: -1};shift;}
+    [[ $1 = . ]] &&{ args=\ ${DIRSTACK[@]: -1};shift;}
     for m;{
      [[ $m = -- ]] && DNO=1
-     if [[ $m =~ ^-(/.*)? ]];then b=${BASH_REMATCH[1]}
+     if [[ $m =~ ^-(/.*)?$ ]];then b=${BASH_REMATCH[1]}
       if [[ $m = */ ]] ;then echo -n $x>&2;read -ei "$args ~-$b" args
       else args=$args\ ~-$b;fi
      elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
       f=${BASH_REMATCH[1]}
       n=${BASH_REMATCH[2]}
-      b=${BASH_REMATCH[3]}
-      if [[ $b =~ ^//.|^/$ ]] ;then
-       b=${b/\/\//\/}
-       args=$args\ $f$n${b%/}
+      b=${BASH_REMATCH[3]%/}
+      if [[ $b =~ ^$|^//. ]] ;then
+       args=$args\ $f$n${b/\/\//\/}
       else
         if ((n<=${#DIRSTACK[@]})) ;then
          dirn=$f${DIRSTACK[n]}$b
@@ -53,7 +52,7 @@ $PWD)return;;
        else
          echo -n "In '$m', $n is out of dir. stack range"
          [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
-         echo -e "\nTo predetermine a number in argument that isn't a dir. stack index, append '/' on CLI:\n'$f$n/$b'"
+         echo -e "\nTo predetermine a number in argument musn't a dir. stack index, append '/' on CLI:\n'$f$n/$b'"
         fi
        fi
      else args=$args\ $m;fi
