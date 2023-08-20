@@ -6,7 +6,7 @@ eval "n=\$$#"
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
-1)	popd 2>/dev/null;;
+1) popd 2>/dev/null;;
 0) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -25,40 +25,40 @@ case $1 in
 $PWD)return;;
 ?*)
  if type -a "$1" 2>/dev/null;then F=1
-   [[ -d $1 ]] &&{
-    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-    read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI)? (x / ELSE KEY) ' o
-    [[ $o = [xX] ]] ||{ pushd $1;F=;}
-   }
-   ((F)) &&{
-    x=$1;shift;args=;DNO=
-    [[ $1 = . ]] &&{ args=\ ${DIRSTACK[@]: -1};shift;}
-    for m;{
-     [[ $m = -- ]] && DNO=1
-     if [[ $m =~ ^-(/.*)?$ ]];then b=${BASH_REMATCH[1]}
-      if [[ $m = */ ]] ;then echo -n $x>&2;read -ei "$args ~-$b" args
-      else args=$args\ ~-$b;fi
-     elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
-      f=${BASH_REMATCH[1]}
-      n=${BASH_REMATCH[2]}
-      b=${BASH_REMATCH[3]%/}
-      if [[ $b =~ ^$|^//. ]] ;then
-       args=$args\ $f$n${b/\/\//\/}
+  [[ -d $1 ]] &&{
+   echo "'$1' is a directory in the working dir. but it's a name of an executable too"
+   read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI)? (x / ELSE KEY) ' o
+   [[ $o = [xX] ]] ||{ pushd $1;F=;}
+  }
+  ((F)) &&{
+   x=$1;shift;args=;DNO=
+   [[ $1 = . ]] &&{ args=\ ${DIRSTACK[@]: -1};shift;}
+   for m;{
+    [[ $m = -- ]] && DNO=1
+    if [[ $m =~ ^-(/.*)?$ ]];then
+     args=$args\ ~-${BASH_REMATCH[1]}
+     [[ $m = */ ]] &&{ echo -n $x>&2;read -ei "$args" args;args=\ $args;}
+    elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
+     f=${BASH_REMATCH[1]}
+     n=${BASH_REMATCH[2]}
+     b=${BASH_REMATCH[3]%/}
+     if [[ $b =~ ^$|^//. ]] ;then args=$args\ $f$n${b/\/\//\/}
+     else
+      if ((n<=${#DIRSTACK[@]})) ;then
+       args=$args\ $f${DIRSTACK[n]}$b
+       [[ $m = */ ]] &&{ echo -n $x>&2;read -ei "$args" args;args=\ $args;}
       else
-        if ((n<=${#DIRSTACK[@]})) ;then
-         dirn=$f${DIRSTACK[n]}$b
-         if [[ $m = */ ]] ;then echo -n $x>&2;read -ei "$args $dirn" args
-         else args=$args\ $dirn;fi
-       else
-         echo -n "In '$m', $n is out of dir. stack range"
-         [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
-         echo -e "\nTo predetermine a number in argument musn't a dir. stack index, append '/' on CLI:\n'$f$n/$b'"
-        fi
-       fi
-     else args=$args\ $m;fi
-     }
-     eval "$x $args">&2
-    }
+       echo -n "In '$m', $n is out of dir. stack range"
+       [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
+       echo -e "\nTo predetermine a number in argument is a directory, append '/' on CLI:\n'$f$n/$b'"
+       continue
+      fi
+     fi
+    else args=$args\ $m;fi
+   }
+   echo;echo "$x$args">&2
+   eval "$x$args">&2
+  }
 else
   if (((i=$#)>1)) ;then C=$PWD
    while ((i)) ;do
