@@ -7,7 +7,7 @@ DIRST=(${d:1})
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
-1)	popd 2>/dev/null;;
+1) popd 2>/dev/null;;
 0) for m in $DIRST ;{ pushd "$m"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -21,9 +21,11 @@ case $1 in
  if 2>/dev/null pushd "${DIRST[$1]}";then echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2}
  fi;;
-,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
-  else DIRS=$DIRSB ;fi
-  PS1=$(echo -e "$DIRS\e[41;1;37m%~\e[44;1;33m\n%%\e[m ");return;;
+,) if ((HIDIRF)) ;then
+  echo NOW DIRECTORY STACK LIST IS HIDDEN>&2
+  PS1=$(echo -e "\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
+ else PS1=$(echo -e "$DIRSB\e[41;1;37m%~\e[44;1;33m\n%%\e[m ");fi
+ return;;
 $PWD)return;;
 ?*)
  if type -a "$1" 2>/dev/null;then F=1
@@ -32,32 +34,33 @@ $PWD)return;;
    read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI) ? (x / ELSE KEY) ' o
    [[ $o = [xX] ]] ||{ pushd  $1;F= }}
   ((F)) &&{
-  x=$1;shift;args=;DNO=
-  [[ $1 = . ]] &&{ args=\ ${DIRST: -1};shift}
-  for m;{
-   [[ $m = -- ]] && DNO=1
-   if [[ $m =~ "^-(/.*)?$" ]];then
-    args=$args\ ~-${match[1]}
-    [[ $m = */ ]] &&{
-     cl=$x$args; vared cl ;args=\ ${cl#[! ]* } }
-   elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ "^([^1-9]*)([1-9][0-9]*)(.*)" ]] ;then
-    f=${match[1]}
-    n=${match[2]}
-    b=${match[3]%/}
-    if [[ $b =~ "^$|^//." ]] ;then
-     args=$args\ $f$n${b/\/\//\/}
-    else
-     if ((n<=$#DIRST)) ;then
-      args=$args\ $f$DIRST[n]$b
-      [[ $m = */ ]] &&{ cl=$x$args; vared cl ;args=\ ${cl#[! ]* } }
+   x=$1;shift;args=;DNO=
+   [[ $1 = . ]] &&{ args=\ ${DIRST: -1};shift}
+   for m;{
+    if [[ $m = -- ]] ;then DNO=1
+    elif [[ $m =~ "^-(/.*)?$" ]];then
+     args=$args\ ~-${match[1]}
+     [[ $m = */ ]] && vared -p $x args
+    elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ "^([^1-9]*)([1-9][0-9]*)(.*)" ]] ;then
+     f=${match[1]}
+     n=${match[2]}
+     b=${match[3]%/}
+     if [[ $b =~ "^$|^//." ]] ;then
+      args=$args\ $f$n${b/\/\//\/}
      else
+      if ((n<=$#DIRST)) ;then
+       args=$args\ $f$DIRST[n]$b
+       [[ $m = */ ]] && vared -p $x args
+      else
        echo -n "In '$m', $n is out of dir. stack range"
        [[ -d $m ]] && echo ", while it's a directory. Will not proceed"
-       echo -e "\nTo predetermine a number in argument isn't any of dir. stack, append '/' on CLI:\n'$f$n/$b'"
+       echo -e "\nTo predetermine a number in argument is a directory, append '/' on CLI:\n'$f$n/$b'"
+       continue
       fi
      fi
-   else args=$args\ $m;fi
+    else args=$args\ $m;fi
    }
+   echo;echo "$x$args">&2
    eval "$x$args">&2
   }
 else
@@ -94,7 +97,7 @@ W=;for d;{ pushd "$d" 2>/dev/null ||C=$C\ $1;}
  done
 }< <(dirs -v)
 DIRSB=$(echo -e "${d:+$d\n\r}")
- if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST>&2;DIRS=
- else DIRS=$DIRSB ;fi
- PS1=$(echo -e "$DIRS\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
+ if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST>&2;D=
+ else D=$DIRSB ;fi
+ PS1=$(echo -e "$D\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
 }>/dev/null
