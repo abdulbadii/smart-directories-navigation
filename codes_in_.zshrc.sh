@@ -1,4 +1,4 @@
-PS1=$(echo -e "${d:+$d\n\r}\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
+PS1="$d%F{015}%K{001}%~$N%F{011}%K{004}%%%F{015}%K{000} "
 g(){
 [[ ${@:-1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1}}
 IFS=$'\n'
@@ -7,12 +7,12 @@ DIRST=(${d:1})
 case $1 in
 .) pushd -0;;
 -) pushd ~-;;
-1) popd 2>/dev/null;;
+1)	popd 2>/dev/null;;
 0) for m in $DIRST ;{ pushd "$m"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) 2>/dev/null ||break};;
-00) dirs -c;PS1=$(echo -e "\e[41;1;37m%~\e[44;1;33m\n%%\e[m ");return;;
+00) dirs -c;PS1="%F{015}%K{001}%~$N%F{011}%K{004}%%%F{015}%K{000} ";return;;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
@@ -23,8 +23,8 @@ case $1 in
  fi;;
 ,) if ((HIDIRF)) ;then
   echo NOW DIRECTORY STACK LIST IS HIDDEN>&2
-  PS1=$(echo -e "\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
- else PS1=$(echo -e "$DIRSB\e[41;1;37m%~\e[44;1;33m\n%%\e[m ");fi
+  PS1="%F{015}%K{001}%~$N%F{011}%K{004}%%%F{015}%K{000} "
+ else PS1="$DIRS%F{015}%K{001}%~$N%F{011}%K{004}%%%F{015}%K{000} ";fi
  return;;
 $PWD)return;;
 ?*)
@@ -60,7 +60,7 @@ $PWD)return;;
      fi
     else args=$args\ $m;fi
    }
-   echo;echo "$x$args">&2
+   echo -e "\n$x$args">&2
    eval "$x$args">&2
   }
 else
@@ -93,11 +93,12 @@ W=;for d;{ pushd "$d" 2>/dev/null ||C=$C\ $1;}
  read l
  d=;while read l
  do [[ $l =~ "^([1-9]+)\h+(.+)" ]]
-  d="$d\e[41;1;37m${match[1]}\e[40;1;32m${match[2]}\e[m "
+  d="$d%F{015}%K{001}${match[1]}%F{010}%K{000} ${match[2]}%F{0015}%K{000} "
  done
 }< <(dirs -v)
-DIRSB=$(echo -e "${d:+$d\n\r}")
+ N=$'\n'
+ DIRS=${d:+$d$N}
  if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST>&2;D=
- else D=$DIRSB ;fi
- PS1=$(echo -e "$D\e[41;1;37m%~\e[44;1;33m\n%%\e[m ")
+ else D=$DIRS ;fi
+ PS1="$D%F{015}%K{001}%~$N%F{011}%K{004}%%%F{015}%K{000} "
 }>/dev/null
