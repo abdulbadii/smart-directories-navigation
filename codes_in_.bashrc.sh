@@ -4,9 +4,7 @@ eval "n=\$$#"
 [[ $n = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
 }
 case $1 in
-.) pushd -0;;
--) pushd ~-;;
-1) popd 2>/dev/null;;
+1)	popd 2>/dev/null;;
 0) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -24,7 +22,7 @@ case $1 in
   else DIRS=$DIRSB ;fi;return;;
 $PWD)return;;
 ?*)
- if type -a "$1" 2>/dev/null;then F=1
+ if type -a "$1" 2>/dev/null &&[[ $1 != . ]];then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI)? (x / ELSE KEY) ' o
@@ -56,18 +54,28 @@ $PWD)return;;
      fi
     else args=$args\ $m;fi
    }
-   echo;echo "$x$args">&2
+   echo -e "\n$x$args">&2
    eval "$x$args">&2
   }
-else
-  if (((i=$#)>1)) ;then C=$PWD
-   while ((i)) ;do
-    eval "n=\${$((i--))}"
-    if [[ $n = /* ]] ;then [[ -d $n ]] &&pushd "$n" 
-    else [[ -d $C/$n ]] &&pushd "$C/$n";fi
-   done
-   pushd -0;pushd ~-
-  else pushd "$1";fi
+else D=1
+ [[ $1 = [-.] ]] &&{ D=
+  if [[ $1 = . ]];then pushd -0;else pushd ~-;fi;shift
+ }
+ i=$#;C=$PWD
+ while ((i)) ;do
+  eval "n=\${$((i--))}"
+  [[ $n != /* ]] && n="$C/$n" 
+  [[ -d $n ]] ||{ G=
+   echo "'$n' is not directory">&2
+   n=${n%/*};n=$n/
+   [[ -d $n ]] ||continue
+   if((i+D)) ;then G="Put directory '$n' onto stack"
+   else G='Go to the directory '$n'';fi
+   read -N1 -p "$G ? (n: No. ELSE KEY: Yes) " o;echo>&2
+   [[ $o = n ]] &&continue;}
+  pushd -n "$n"
+ done
+ ((D)) &&pushd
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
