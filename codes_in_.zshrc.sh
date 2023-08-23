@@ -6,7 +6,7 @@ IFS=$'\n'
 d=(`dirs -pl`)
 DIRST=(${d:1})
 case $1 in
-1)	popd -q 2>/dev/null;;
+1) popd -q 2>/dev/null;;
 0) for m in $DIRST ;{ pushd -q "$m"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd -q +$m 2>/dev/null ;};;
@@ -25,7 +25,6 @@ case $1 in
   PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
  else PS1="$DIRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
  return;;
-$PWD)return;;
 ?*)
  if type -a "$1"&>/dev/null &&[[ $1 != . ]];then F=1
   [[ -d $1 ]] &&{
@@ -70,11 +69,11 @@ else D=1
  pushd +1 &>/dev/null
  while ((i)) ;do
   eval "n=\${$((i--))}"
-  [[ $n != /* ]] && n="$C/$n" 
+  [[ $n != /* ]] && n="$C/$n"
   [[ -d $n ]] ||{ G=
    echo "'$n' is not a directory"
    n=${n%/*};n=$n/
-   [[ -d $n ]] ||continue
+   [[ ! -d $n || $n = $PWD ]] &&continue
    if ((i+D));then G="Put directory '$n' into stack"
    else G='Go to the directory '$n'';fi
    read -k1 "?$G ? (n: No. ELSE KEY: Yes) " o;echo
@@ -82,7 +81,7 @@ else D=1
   pushd -q "$n" 
  done
  pushd -q -0
- ((D)) &&pushd -q
+ ((D*$#DIRST)) &&pushd -q
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd -q ~
 esac
