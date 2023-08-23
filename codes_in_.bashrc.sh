@@ -19,8 +19,7 @@ case $1 in
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
  ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
-  else DIRS=$DIRSB ;fi;return;;
-$PWD)return;;
+  else DIRS=$D ;fi;return;;
 ?*)
  if type -a "$1" 2>/dev/null &&[[ $1 != . ]];then F=1
   [[ -d $1 ]] &&{
@@ -57,25 +56,25 @@ $PWD)return;;
    echo -e "\n$x$args">&2
    eval "$x$args">&2
   }
-else D=1
- [[ $1 = [-.] ]] &&{ D=
+else F=
+ [[ $1 = [-.] ]] &&{
   if [[ $1 = . ]];then pushd -0;else pushd ~-;fi;shift
  }
  i=$#;C=$PWD
  while ((i)) ;do
   eval "n=\${$((i--))}"
   [[ $n != /* ]] && n="$C/$n" 
+  [[ -e $n ]] ||{ echo "cannot stat '$n'">&2;continue;}
   [[ -d $n ]] ||{ G=
    echo "'$n' is not directory">&2
    n=${n%/*};n=$n/
-   [[ -d $n ]] ||continue
-   if((i+D)) ;then G="Put directory '$n' onto stack"
-   else G='Go to the directory '$n'';fi
-   read -N1 -p "$G ? (n: No. ELSE KEY: Yes) " o;echo>&2
+   [[ ! -d $n || $n = $PWD ]] &&continue
+   read -N1 -p "Go to, or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo>&2
    [[ $o = n ]] &&continue;}
-  pushd -n "$n"
+   F=1
+   pushd -n "$n"
  done
- ((D)) &&pushd
+ ((F)) &&pushd
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
@@ -101,7 +100,7 @@ for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
   d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
 }< <(dirs -v)
-DIRSB=$(echo -e "${d:+$d\n\r}")
+D=$(echo -e "${d:+$d\n\r}")
 if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST>&2;DIRS=
-else DIRS=$DIRSB ;fi
+else DIRS=$D ;fi
 }>/dev/null
