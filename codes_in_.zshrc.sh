@@ -1,12 +1,11 @@
 PS1="$d%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 g(){
-[[ ${@:-1} = , ]] &&{ ((HIDIRF=1-HIDIRF))
-((#>1)) &&set -- ${@:1:-1}}
+local D DIRS
+[[ ${@:-1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1} }
 IFS=$'\n'
-d=(`dirs -pl`)
-DIRST=(${d:1})
+d=(`dirs -pl`);DIRST=(${d:1})
 case $1 in
-1) popd -q 2>/dev/null;;
+1)	popd -q 2>/dev/null;;
 0) for m in $DIRST ;{ pushd -q "$m"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd -q +$m 2>/dev/null ;};;
@@ -20,13 +19,12 @@ case $1 in
  if 2>/dev/null pushd -q "${DIRST[$1]}";then echo -ne $m
  else [[ $m ]] &&{ pushd -q "$1";echo $n}
  fi;;
-,) if ((HIDIRF)) ;then
-  echo NOW DIRECTORY STACK LIST IS HIDDEN
+,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN
   PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
- else PS1="$DIRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
+ else PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
  return;;
 ?*)
- if type -a "$1"&>/dev/null &&[[ $1 != . ]];then F=1
+ if type -a "$1"&>/dev/null;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -k1 '?Is it an executable or directory name (which must be appended with / on CLI) ? (x / ELSE KEY) ' o
@@ -61,27 +59,28 @@ case $1 in
    echo -e "\n$x$args"
    eval "$x$args"
   }
-else D=1
- [[ $1 = [-.] ]] &&{ D=
-  if [[ $1 = . ]];then pushd -q -0;else pushd -q ~-;fi;shift
- }
- i=$#;C=$PWD
- pushd +1 &>/dev/null
- while ((i)) ;do
-  eval "n=\${$((i--))}"
-  [[ $n != /* ]] && n="$C/$n"
-  [[ -d $n ]] ||{ G=
-   echo "'$n' is not a directory"
+else
+ F=;DF=
+ C=$PWD;i=$#
+ if [[ $1 = - && i = 1 ]];then i=0;pushd -q ~-
+ else
+  [[ $1 = - ]] &&{ ((i--));shift;DF=1 }
+  pushd +1 &>/dev/null
+ fi
+ while n=${!i}; ((i--)) ;do
+  [[ $n != /* ]] && n="$C/$n" 
+  [[ -e $n ]] ||{ echo "cannot stat '$n'";continue}
+  [[ -d $n ]] ||{
+   echo "'$n' is not directory"
    n=${n%/*};n=$n/
    [[ ! -d $n || $n = $PWD ]] &&continue
-   if ((i+D));then G="Put directory '$n' into stack"
-   else G='Go to the directory '$n'';fi
-   read -k1 "?$G ? (n: No. ELSE KEY: Yes) " o;echo
+   read -k1 "?Go to, or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo
    [[ $o = n ]] &&continue}
-  pushd -q "$n" 
+   F=1
+   pushd -q "$n" 
  done
  pushd -q -0
- ((D*$#DIRST)) &&pushd -q
+ ((F+DF)) &&pushd -q
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd -q ~
 esac
@@ -107,8 +106,8 @@ C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C\ $1;}
  done
 }< <(dirs -v)
  N=$'\n'
- DIRS=${d:+$d$N}
- if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST;D=
- else D=$DIRS ;fi
- PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+ D=${d:+$d$N}
+ if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST;DIRS=
+ else DIRS=$D ;fi
+ PS1="$DIRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 }
