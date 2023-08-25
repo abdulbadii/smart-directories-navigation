@@ -1,10 +1,10 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
-eval "n=\$$#"
-[[ $n = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
+local D
+[[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
 }
 case $1 in
-1)	popd 2>/dev/null;;
+1) popd 2>/dev/null;;
 0) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
@@ -21,7 +21,7 @@ case $1 in
  ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
   else DIRS=$D ;fi;return;;
 ?*)
- if type -a "$1" 2>/dev/null &&[[ $1 != . ]];then F=1
+ if type -a "$1" 2>/dev/null;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI)? (x / ELSE KEY) ' o
@@ -56,16 +56,17 @@ case $1 in
    echo -e "\n$x$args">&2
    eval "$x$args">&2
   }
-else F=
- [[ $1 = [-.] ]] &&{
-  if [[ $1 = . ]];then pushd -0;else pushd ~-;fi;shift
+else
+ F=;DF=
+ C=$PWD;i=$#
+ [[ $1 = - ]]&&{
+  if ((i==1));then i=0;pushd ~-
+  else ((i--));shift;DF=1; pushd +1;fi
  }
- i=$#;C=$PWD
- while ((i)) ;do
-  eval "n=\${$((i--))}"
+ while n=${!i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n" 
   [[ -e $n ]] ||{ echo "cannot stat '$n'">&2;continue;}
-  [[ -d $n ]] ||{ G=
+  [[ -d $n ]] ||{
    echo "'$n' is not directory">&2
    n=${n%/*};n=$n/
    [[ ! -d $n || $n = $PWD ]] &&continue
@@ -74,7 +75,8 @@ else F=
    F=1
    pushd -n "$n"
  done
- ((F)) &&pushd
+ if ((DF));then pushd -0;pushd
+ elif ((F));then pushd ;fi
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
