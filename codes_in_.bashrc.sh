@@ -20,7 +20,7 @@ case $1 in
  ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
   else DIRS=$D ;fi;return;;
 ?*)
- if [[ $1 != . ]]  && type -a "$1"&>/dev/null || ([[ $1 = . && -f $2 ]]) ;then F=1
+ if type -a "$1"&>/dev/null && [[ $1 != . ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too">&2
    read -N1 -p 'Mean it as an executable or directory name (Predetermine by appending / on CLI) ? (x / ELSE KEY) ' o
@@ -56,45 +56,47 @@ case $1 in
    eval "$x$args">&2
   }
 else
- F=;DF=
+ unset F DS DT
  C=$PWD;i=$#
- [[ $1 = - ]]&&{
-  if ((i==1));then i=0;pushd ~-
-  else ((i--));shift;DF=1; pushd +1;fi
- }
+ if [[ $1 = - ]] ;then
+  if ((--i)) ;then shift;DS=1; pushd +1 ;else pushd ~-;fi
+ elif [[ $1 = . ]] ;then
+  if ((--i)) ;then shift;DT=1 ;else pushd -0;fi
+ fi
  while n=${!i}; ((i--)) ;do
-  [[ $n != /* ]] && n="$C/$n" 
-  [[ ! -e $n && -d $n ]] &&{ echo "cannot stat '$n'">&2;continue;}
+  [[ $n != /* ]] && n="$C/$n"
+  [[ $n = $PWD ]] &&continue
   [[ -d $n ]] ||{
    echo "'$n' is not directory">&2
    n=${n%/*};n=$n/
    [[ ! -d $n || $n = $PWD ]] &&continue
-   read -N1 -p "Go to, or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo>&2
+   read -N1 -p "Go into or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo>&2
    [[ $o = n ]] &&continue;}
    F=1
    pushd -n "$n"
  done
- if ((DF));then pushd -0;pushd
+ if ((DS));then pushd -0;pushd
+ elif ((DT));then pushd -0
  elif ((F));then pushd ;fi
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
 IFS=$'\n'
 l=`dirs -l -p`
-l=$'\n'${l//$'\n'/$'\n\n'}$'\n'
+d=$'\n'${l//$'\n'/$'\n\n'}$'\n'
 o=
 while :
-do set -- $l
-	l=${l//$'\n'$1$'\n'}
- [[ $l ]] || break
+do set -- $d
+	d=${d//$'\n'$1$'\n'}
+ [[ $d ]] || break
  o="'$1' $o"
 done
 cd $1
 dirs -c
 unset IFS C d
 eval set -- $o
-for i ;{ pushd "$i" 2>/dev/null ||C=$C,$1;}
- [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C/,/ }'">&2
+for i ;{ pushd "$i" ||C=$C,$1;}
+[[ $C ]]&&echo "Directories failed being kept in dir. stack:\"${C/,/ }\"">&2
 { read l
  while read l
  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
