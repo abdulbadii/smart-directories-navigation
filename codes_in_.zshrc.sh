@@ -1,7 +1,6 @@
 PS1="$d%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 g(){
-local D DIRS
-[[ ${@:-1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1} }
+[[ ${@: -1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1} }
 IFS=$'\n'
 d=(`dirs -pl`);DIRST=(${d:1})
 case $1 in
@@ -24,7 +23,7 @@ case $1 in
  else PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
  return;;
 ?*)
- if type -a "$1"&>/dev/null;then F=1
+ if type -a "$1"&>/dev/null && [[ $1 != . ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -k1 '?Is it an executable or directory name (which must be appended with / on CLI) ? (x / ELSE KEY) ' o
@@ -67,7 +66,7 @@ else
   [[ $1 = - ]] &&{ ((i--));shift;DF=1 }
   pushd +1 &>/dev/null
  fi
- while n=${!i}; ((i--)) ;do
+ while n=${(P)i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n" 
   [[ -e $n ]] ||{ echo "cannot stat '$n'";continue}
   [[ -d $n ]] ||{
@@ -96,8 +95,8 @@ done
 cd $1
 dirs -c
 eval set -- $=o
-C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C\ $1;}
- [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C// /,}'"
+C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C,$1;}
+ [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C/,/ }'"
 {
  read l
  d=;while read l
@@ -105,9 +104,9 @@ C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C\ $1;}
   d="$d%F{015}%K{001}${match[1]}%F{010}%K{000}${match[2]}%f%k "
  done
 }< <(dirs -v)
- N=$'\n'
- D=${d:+$d$N}
- if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST;DIRS=
- else DIRS=$D ;fi
- PS1="$DIRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+N=$'\n'
+D=${d:+$d$N}
+if ((HIDIRF)) ;then echo ${(%%)d}
+ PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+else PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
 }
