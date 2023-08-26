@@ -1,6 +1,5 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
-local D
 [[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
 }
 case $1 in
@@ -21,10 +20,10 @@ case $1 in
  ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
   else DIRS=$D ;fi;return;;
 ?*)
- if type -a "$1" 2>/dev/null;then F=1
+ if [[ $1 != . ]]  && type -a "$1"&>/dev/null || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
-   echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-   read -N1 -p 'Is it an executable or directory name (which must be appended with / on CLI)? (x / ELSE KEY) ' o
+   echo "'$1' is a directory in the working dir. but it's a name of an executable too">&2
+   read -N1 -p 'Mean it as an executable or directory name (Predetermine by appending / on CLI) ? (x / ELSE KEY) ' o
    [[ $o = [xX] ]] ||{ pushd $1;F=;}
   }
   ((F)) &&{
@@ -65,7 +64,7 @@ else
  }
  while n=${!i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n" 
-  [[ -e $n ]] ||{ echo "cannot stat '$n'">&2;continue;}
+  [[ ! -e $n && -d $n ]] &&{ echo "cannot stat '$n'">&2;continue;}
   [[ -d $n ]] ||{
    echo "'$n' is not directory">&2
    n=${n%/*};n=$n/
@@ -94,8 +93,8 @@ cd $1
 dirs -c
 unset IFS C d
 eval set -- $o
-for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
- [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C// /,}'">&2
+for i ;{ pushd "$i" 2>/dev/null ||C=$C,$1;}
+ [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C/,/ }'">&2
 { read l
  while read l
  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
@@ -103,6 +102,6 @@ for i ;{ pushd "$i" 2>/dev/null ||C=$C\ $1;}
  done
 }< <(dirs -v)
 D=$(echo -e "${d:+$d\n\r}")
-if ((HIDIRF)) ;then echo ..HIDING DIRECTORY STACK LIST>&2;DIRS=
-else DIRS=$D ;fi
+DIRS=$D
+((HIDIRF)) &&{ echo -n "${D@P}">&2; DIRS=;}
 }>/dev/null
