@@ -91,12 +91,12 @@ do set -- $d
  [[ $d ]] || break
  o="'$1' $o"
 done
-cd $1
+pushd $1
 dirs -c
 unset IFS C d
 eval set -- $o
 for i ;{ pushd "$i" ||C=$C,$1;}
-[[ $C ]]&&echo "Directories failed being kept in dir. stack:\"${C/,/ }\"">&2
+[[ $C ]]&&echo "Supposedly but not kept in dir. stack:\"${C/,/ }\"">&2
 { read l
  while read l
  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
