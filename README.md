@@ -48,6 +48,5 @@ For the purpose of get more its various selection, append // to the argument. Th
 
 g [optionally any g option/command] ,  
 toggle hiding or showing the directory stack list ouput onto prompt string   
-if there is any command, execute it first before toggling it   
-excepts, naturally, the mere `g`, in which `g ,` just to toggle hide or show the directory stack list,    
-not perform going into $HOME directory first   
+if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show dir. stack list and will hide it on the next command prompt   
+so naturally, the mere `g`, in which `g ,` just to toggle hide or show the directory stack list, not at all to mean and go into $HOME directory first   
