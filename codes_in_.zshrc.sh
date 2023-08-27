@@ -15,7 +15,7 @@ case $1 in
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/, since no index $1 in directory list"
  }
- if 2>/dev/null pushd -q "${DIRST[$1]}";then echo -ne $m
+ if d=$DIRST[$1]; popd +$1; 2>/dev/null pushd -q "$d" ;then echo -ne $m
  else [[ $m ]] &&{ pushd -q "$1";echo $n}
  fi;;
 ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN
@@ -59,12 +59,12 @@ case $1 in
    eval "$x$args"
   }
 else
- F=;DF=
+ unset F DS DT
  C=$PWD;i=$#
- if [[ $1 = - && i = 1 ]];then i=0;pushd -q ~-
- else
-  [[ $1 = - ]] &&{ ((i--));shift;DF=1 }
-  pushd +1 &>/dev/null
+ if [[ $1 = - ]] ;then
+  if ((--i)) ;then shift;DS=1; pushd -q +1 ;else pushd -q ~-;fi
+ elif [[ $1 = . ]] ;then
+  if ((--i)) ;then shift;DT=1 ;else pushd -q -0;fi
  fi
  while n=${(P)i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n" 
@@ -73,13 +73,14 @@ else
    echo "'$n' is not directory"
    n=${n%/*};n=$n/
    [[ ! -d $n || $n = $PWD ]] &&continue
-   read -k1 "?Go to, or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo
+   read -k1 "?Go into or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo
    [[ $o = n ]] &&continue}
    F=1
    pushd -q "$n" 
  done
- pushd -q -0
- ((F+DF)) &&pushd -q
+ if ((DS));then pushd -q -0;pushd -q
+ elif ((DT));then pushd -q -0
+ elif ((F));then pushd -q ;fi
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd -q ~
 esac
@@ -92,11 +93,11 @@ do set -- $=l
  [[ $l ]] || break
  o="'$1' $o"
 done
-cd $1
+pushd -q $1
 dirs -c
 eval set -- $=o
 C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C,$1;}
- [[ $C ]]&&echo "Directory stack was cleaned up of just removed'${C/,/ }'"
+ [[ $C ]]&&echo "Supposedly but not kept in dir. stack:\"${C/,/ }\""
 {
  read l
  d=;while read l
@@ -108,5 +109,7 @@ N=$'\n'
 D=${d:+$d$N}
 if ((HIDIRF)) ;then echo ${(%%)d}
  PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
-else PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
+else
+ PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+fi
 }
