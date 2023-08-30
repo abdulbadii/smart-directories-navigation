@@ -15,7 +15,7 @@ go back to the last dir. went from previously (as opposed to g 1 below) which is
 g .   
 go to the earliest dir. which is the deepest dir. on dir. stack   
 
-g 0   
+g -r   
 reverse the dir. index order and get into the earliest dir.   
 
 g {nth}   
@@ -39,14 +39,17 @@ remove the nth index and every dir. greater than it of dir. stack
 g 0{nth}-{Nth}  
 remove every dir. index in the range nth to Nth index of dir. stack   
 
-g 00   
+g -c   
 clean up all dir. stack   
 
-g \<Bash command line\>   
-any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
-For the purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which is ready to do what Bash command prompt is, e.g: modify the argument string, (executable) path auto completion, etc
+g ,,   
+refresh i.e. update the terminal printout of dir. stack which is cleaned up from duplicate and inexistant directories   
 
 g [optionally any g option/command] ,  
 toggle hiding or showing the directory stack list ouput onto prompt string   
 if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show dir. stack list and will hide it on the next command prompt   
-so naturally, the mere `g`, in which `g ,` just to toggle hide or show the directory stack list, not at all to mean and go into $HOME directory first   
+so naturally, `g ,` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
+
+g \<Bash command line\>   
+any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
+For the purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which is ready to do what Bash command prompt is, e.g: modify the argument string, (executable) path auto completion, etc
