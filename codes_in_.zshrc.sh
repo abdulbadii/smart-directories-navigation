@@ -1,27 +1,27 @@
-PS1="$d%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+PS1="$_DRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 g(){
 [[ ${@: -1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1} }
 IFS=$'\n'
 d=(`dirs -pl`);DIRST=(${d:1})
 case $1 in
 1)	popd -q 2>/dev/null;;
-0) for m in $DIRST ;{ pushd -q "$m"};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd -q +$m 2>/dev/null ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd -q +$((n-i++)) 2>/dev/null ||break};;
-00) dirs -c;PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";return;;
+-r) for m in $DIRST ;{ pushd -q "$m"};;
+-c) dirs -c;PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";return;;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/, since no index $1 in directory list"
  }
- if d=$DIRST[$1]; popd +$1; 2>/dev/null pushd -q "$d" ;then echo -ne $m
+ if 2>/dev/null pushd -q "$DIRST[$1]";then popd -q +$(($1+1)); echo -ne $m
  else [[ $m ]] &&{ pushd -q "$1";echo $n}
  fi;;
 ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN
   PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
- else PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi
- return;;
+ else PS1="$_DRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi;return;;
+,,);;
 ?*)
  if type -a "$1"&>/dev/null && [[ $1 != . ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
@@ -96,8 +96,8 @@ done
 pushd -q $1
 dirs -c
 eval set -- $=o
-C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C,$1;}
- [[ $C ]]&&echo "Supposedly but not kept in dir. stack:\"${C/,/ }\""
+C=;for o;{ pushd "$o"&>/dev/null ||C=C="$C, '$o'" }
+ [[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
 {
  read l
  d=;while read l
@@ -106,10 +106,10 @@ C=;for d;{ pushd -q "$d" 2>/dev/null ||C=$C,$1;}
  done
 }< <(dirs -v)
 N=$'\n'
-D=${d:+$d$N}
+_DRS=${d:+$d$N}
 if ((HIDIRF)) ;then echo ${(%%)d}
  PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 else
- PS1="$D%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
+ PS1="$_DRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
 fi
 }
