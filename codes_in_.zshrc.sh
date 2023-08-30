@@ -64,7 +64,7 @@ else
  if [[ $1 = - ]] ;then
   if ((--i)) ;then shift;DS=1; pushd -q +1 ;else pushd -q ~-;fi
  elif [[ $1 = . ]] ;then
-  if ((--i)) ;then shift;DT=1 ;else pushd -q -0;fi
+  if ((--i)) ;then shift;pushd -q +1;DT=1 ;else pushd -q -0;fi
  fi
  while n=${(P)i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n" 
@@ -72,15 +72,15 @@ else
   [[ -d $n ]] ||{
    echo "'$n' is not directory"
    n=${n%/*};n=$n/
-   [[ ! -d $n || $n = $PWD ]] &&continue
-   read -k1 "?Go into or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo
+   [[ ! -d $n || $n = $PWD ]] &&{ echo "Neither is '$n'";continue }
+   read -k1 "?But witten under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
    [[ $o = n ]] &&continue}
    F=1
    pushd -q "$n" 
  done
  if ((DS));then pushd -q -0;pushd -q
- elif ((DT));then pushd -q -0
- elif ((F));then pushd -q ;fi
+ elif ((DT));then pushd -q -1
+ elif ((F*DS*DT));then pushd -q ;fi
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd -q ~
 esac
