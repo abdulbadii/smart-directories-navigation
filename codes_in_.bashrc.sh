@@ -4,23 +4,24 @@ g(){
 }
 case $1 in
 1) popd 2>/dev/null;;
-0) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) 2>/dev/null ||break;};;
-00) dirs -c;DIRS=;return;;
+-r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
+-c) dirs -c;_DIRS=;return;;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/, since no index $1 in directory list"
  }
- if 2>/dev/null pushd "${DIRSTACK[$1]}";then echo -ne $m>&2
+ if 2>/dev/null pushd "${DIRSTACK[$1]}";then popd +$(($1+1)); echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
- ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;DIRS=
-  else DIRS=$D ;fi;return;;
+ ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;_DIRS=
+  else _DIRS=$_DRS ;fi;return;;
+,,);;
 ?*)
- if type -a "$1"&>/dev/null && [[ $1 != . ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
+ if [[ `type -t "$1"` && $1 != . && -e $2 ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too">&2
    read -N1 -p 'Mean it as an executable or directory name (Predetermine by appending / on CLI) ? (x / ELSE KEY) ' o
@@ -56,28 +57,31 @@ case $1 in
    eval "$x$args">&2
   }
 else
- unset F DS DT
- C=$PWD;i=$#
- if [[ $1 = - ]] ;then
-  if ((--i)) ;then shift;DS=1; pushd +1 ;else pushd ~-;fi
- elif [[ $1 = . ]] ;then
-  if ((--i)) ;then shift;DT=1 ;else pushd -0;fi
+ F=;C=$PWD; i=$#
+ if [[ $1 = [-.] ]] ;then
+   [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
+ else F=1
  fi
- while n=${!i}; ((i--)) ;do
+ while :;do
+ n=${!i}; ((--i))
   [[ $n != /* ]] && n="$C/$n"
   [[ $n = $PWD ]] &&continue
-  [[ -d $n ]] ||{
-   echo "'$n' is not directory">&2
+  ((F || i )) &&{
+    [[ -d $n ]] ||{
+   echo "'$n' is not a directory"
    n=${n%/*};n=$n/
-   [[ ! -d $n || $n = $PWD ]] &&continue
-   read -N1 -p "Go into or put the directory '$n' onto stack? (n: No. ELSE KEY: Yes) " o;echo>&2
-   [[ $o = n ]] &&continue;}
-   F=1
-   pushd -n "$n"
+   [[ ! -d $n || $n = $PWD ]] &&{ echo "Neither is '$n'";continue;}
+   read -N1 -p "But written under existing directory '$n', put on stack? (n: No. ELSE KEY: Yes) " o;echo
+   [[ $o = n ]] &&continue
+   }>&2
+  }
+  if ((i)) ;then pushd -n "$n"
+  else
+     if (( F )) ;then pushd "$n"
+     else pushd -0 ;fi
+     break
+  fi
  done
- if ((DS));then pushd -0;pushd
- elif ((DT));then pushd -0
- elif ((F));then pushd ;fi
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
@@ -95,15 +99,15 @@ pushd $1
 dirs -c
 unset IFS C d
 eval set -- $o
-for i ;{ pushd "$i" ||C=$C,$1;}
-[[ $C ]]&&echo "Supposedly but not kept in dir. stack:\"${C/,/ }\"">&2
+for o;{ pushd "$o"&>/dev/null ||C="$C, '$o'";}
+[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}">&2
 { read l
  while read l
  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
   d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
 }< <(dirs -v)
-D=$(echo -e "${d:+$d\n\r}")
-DIRS=$D
-((HIDIRF)) &&{ echo -n "${D@P}">&2; DIRS=;}
+_DRS=$(echo -e "${d:+$d\n\r}")
+_DIRS=$_DRS
+((HIDIRF)) &&{ echo -n "${_DRS@P}">&2; _DIRS=;}
 }>/dev/null
