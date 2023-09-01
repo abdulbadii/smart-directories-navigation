@@ -18,11 +18,14 @@ go to the earliest dir. which is the deepest dir. on dir. stack
 g -r   
 reverse the dir. index order and get into the earliest dir.   
 
-g {nth}   
+g {nth}   EXCEPT n=0 and n=1 
 go to the nth index of dir. stack, exception is index 1 by g 1 below
 
+g 0   
+go to directory on top of dir. list   
+
 g 1   
-go to directory pointed by the top of dir. stack and lose the current directory, use `g -` otherwise to keep current dir at top of dir. stack    
+like above, go to directory pointed by top of dir. stack and lose away current directory saving, use `g -` otherwise to keep current dir at top of dir. stack    
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
