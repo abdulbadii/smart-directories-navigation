@@ -10,7 +10,7 @@ g
 go to $HOME dir.   
 
 g -   
-go back to the last dir. went from previously (as opposed to g 1 below) which is the 1st index of dir. stack   
+go back to the last dir. went from previously (as opposed to g 1 below), if top of list not just removed, simply it'd be it   
 
 g .   
 go to the earliest dir. which is the deepest dir. on dir. stack   
@@ -42,6 +42,9 @@ remove every dir. index in the range nth to Nth index of dir. stack
 g -c   
 clean up all dir. stack   
 
+g -r   
+reverse dir. stack index order   
+
 g ,,   
 refresh i.e. update the terminal printout of dir. stack which is cleaned up from duplicate and inexistant directories   
 
@@ -53,3 +56,4 @@ so naturally, `g ,` is merely to toggle hide or show the directory stack list, n
 g \<Bash command line\>   
 any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
 For the purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which is ready to do what Bash command prompt is, e.g: modify the argument string, (executable) path auto completion, etc
+
