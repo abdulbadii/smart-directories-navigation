@@ -3,12 +3,10 @@ g(){
 [[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
 }
 case $1 in
-1) popd 2>/dev/null;;
+0) pushd 2>/dev/null;;
 0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) 2>/dev/null ||break;};;
--r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
--c) dirs -c;_DIRS=;return;;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
@@ -17,6 +15,9 @@ case $1 in
  if 2>/dev/null pushd "${DIRSTACK[$1]}";then popd +$(($1+1)); echo -ne $m>&2
  else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
  fi;;
+1) popd 2>/dev/null;;
+-c) dirs -c;_DIRS=;return;;
+-r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
  ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
@@ -57,29 +58,28 @@ case $1 in
    eval "$x$args">&2
   }
 else
- F=;C=$PWD; i=$#
+ F=
+ C=$PWD; i=$#
  if [[ $1 = [-.] ]] ;then
    [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
  else F=1
  fi
- while :;do
- n=${!i}; ((--i))
+ while n=${!i}; ((i--)) ;do
   [[ $n != /* ]] && n="$C/$n"
   [[ $n = $PWD ]] &&continue
-  ((F || i )) &&{
-    [[ -d $n ]] ||{
-   echo "'$n' is not a directory"
-   n=${n%/*};n=$n/
-   [[ ! -d $n || $n = $PWD ]] &&{ echo "Neither is '$n'";continue;}
-   read -N1 -p "But written under existing directory '$n', put on stack? (n: No. ELSE KEY: Yes) " o;echo
-   [[ $o = n ]] &&continue
-   }>&2
+  [[ -d $n ]] ||{ ((F || i )) &&{
+    echo "'$n' is not a directory"
+    n=${n%/*}/
+    [[ ! -d $n ]] &&{ echo "Neither is '$n'";continue;}
+    [[ $n = $PWD ]] &&continue
+    read -N1 -p "But written under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
+    [[ $o = n ]] &&continue
+    }>&2
   }
-  if ((i)) ;then pushd -n "$n"
+  if (( i )) ;then pushd -n "$n"
   else
      if (( F )) ;then pushd "$n"
      else pushd -0 ;fi
-     break
   fi
  done
 fi;;
