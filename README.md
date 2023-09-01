@@ -10,7 +10,7 @@ g
 go to $HOME dir.   
 
 g -   
-go back to the last dir. went from previously (as opposed to g 1 below), if top of list not just removed, simply it'd be it   
+go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it   
 
 g .   
 go to the earliest dir. which is the deepest dir. on dir. stack   
@@ -46,7 +46,7 @@ g -r
 reverse dir. stack index order   
 
 g ,,   
-refresh i.e. update the terminal printout of dir. stack which is cleaned up from duplicate and inexistant directories   
+refresh i.e. update the prompt string of dir. stack which is cleaned up from duplicate and inexistant directories   
 
 g [optionally any g option/command] ,  
 toggle hiding or showing the directory stack list ouput onto prompt string   
