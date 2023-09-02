@@ -14,7 +14,7 @@ case $1 in
  if (($1==1)) && popd;then :
  elif pushd "${DIRSTACK[$1]}";then popd +$(($1+1))
  elif [[ $m ]] ;then pushd "$1"; m=$n
- else m='No index $1 in directory list nor directory $1 exists\n'
+ else m='No index $1 in directory list nor the directory exists\n'
  fi
  echo -ne $m>&3;;
 -c) dirs -c;_DIRS=;return;;
@@ -59,31 +59,32 @@ case $1 in
    eval "$x$args">&3
   }
 else
- F=;C=$PWD; i=$#
+ F=;D=1;C=$PWD; i=$#
  if [[ $1 = [-.0] ]] ;then
    [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
    [[ $1 = 0 ]] &&{  pushd; pushd +1; }
  else F=1
  fi
  while n=${!i}; ((i--)) ;do
+  n=${n%/}
   [[ $n != /* ]] && n="$C/$n"
-  [[ $n = $PWD ]] &&continue
+  [[ $n = $C ]] &&continue
   [[ -d $n ]] ||{ ((F || i )) &&{
     echo "'$n' is not a directory"
-    n=${n%/*}/
+    n=${n%/*}
     [[ ! -d $n ]] &&{ echo "Neither is '$n'";continue;}
-    [[ $n = $PWD ]] &&continue
+    [[ $n = $C ]] &&continue
     read -N1 -p "But written under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
     [[ $o = n ]] &&continue
     }>&3
   }
   if (( i )) ;then pushd -n "$n"
   else
-     if (( F )) ;then pushd "$n"
-     else pushd -0 ;fi
-     break
+     if (( F )) ;then pushd "$n" ;else pushd -0 ;fi
+     D=;break
   fi
  done
+ ((D)) && pushd
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
@@ -101,7 +102,7 @@ pushd $1
 dirs -c
 unset IFS C d
 eval set -- $o
-for o;{ pushd "$o" || C="$C, '$o'";}
+for o;{ pushd "$o" 2>&3 ||C="$C, '$o'";}
 } &>/dev/null
 exec 3>&-
 [[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
