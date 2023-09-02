@@ -59,7 +59,7 @@ case $1 in
    eval "$x$args">&3
   }
 else
- F=;D=1;C=$PWD; i=$#
+ F=;D=1;C=$PWD i=$#
  if [[ $1 = [-.0] ]] ;then
    [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
    [[ $1 = 0 ]] &&{  pushd; pushd +1; }
@@ -67,7 +67,8 @@ else
  fi
  while n=${!i}; ((i--)) ;do
   n=${n%/}
-  [[ $n != /* ]] && n="$C/$n"
+  : ${n:=/}
+  [[ $n != /* ]] && n="${C%/}/$n"
   [[ $n = $C ]] &&continue
   [[ -d $n ]] ||{ ((F || i )) &&{
     echo "'$n' is not a directory"
