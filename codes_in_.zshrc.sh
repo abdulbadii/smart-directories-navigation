@@ -3,27 +3,29 @@ g(){
 [[ ${@: -1} = , ]] &&{ ((HIDIRF=1-HIDIRF));((#>1)) &&set -- ${@:1:-1} }
 IFS=$'\n'
 d=(`dirs -pl`);DIRST=(${d:1})
+{
 case $1 in
-1)	popd -q 2>/dev/null;;
-0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
-0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd -q +$m 2>/dev/null ;};;
-0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd -q +$((n-i++)) 2>/dev/null ||break};;
--r) for m in $DIRST ;{ pushd -q "$m"};;
--c) dirs -c;PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";return;;
+0[1-9]*-) n=${1%-}; while popd +$n;do :;done;;
+0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for ((i=n-m;i>=0;--i)) ;{ popd -q +$m };;
+0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd -q +$((n-i++)) ||break };;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
   m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/, since no index $1 in directory list"
  }
- if 2>/dev/null pushd -q "$DIRST[$1]";then popd -q +$(($1+1)); echo -ne $m
- else [[ $m ]] &&{ pushd -q "$1";echo $n}
+ if (($1==1)) ;then popd -q; echo -ne $m
+ elif pushd -q "$DIRST[$1]";then popd -q +$(($1+1)); echo -ne $m
+ else
+  [[ $m ]] &&{ pushd -q "$1";echo $n}
  fi;;
+-c) dirs -c;PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";return;;
+-r) for m in $DIRST ;{ pushd -q "$m"};;
 ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN
   PS1="%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k "
  else PS1="$_DRS%F{015}%K{001}%B%~%b$N%F{011}%K{004}%%%f%k ";fi;return;;
 ,,);;
 ?*)
- if type -a "$1"&>/dev/null && [[ $1 != . ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
+ if [[ `whence "$1"` && $1 != . && -e $2 ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -k1 '?Is it an executable or directory name (which must be appended with / on CLI) ? (x / ELSE KEY) ' o
@@ -59,28 +61,33 @@ case $1 in
    eval "$x$args"
   }
 else
- unset F DS DT
- C=$PWD;i=$#
- if [[ $1 = - ]] ;then
-  if ((--i)) ;then shift;DS=1; pushd -q +1 ;else pushd -q ~-;fi
- elif [[ $1 = . ]] ;then
-  if ((--i)) ;then shift;pushd -q +1;DT=1 ;else pushd -q -0;fi
- fi
+ F=;D=1;C=$PWD; i=$#
+ if [[ $1 = . ]] ;then :
+ elif [[ $1 = - ]] ;then  pushd -q ~-; pushd -q +1
+ elif [[ $1 = 0 ]] ;then  pushd -q; pushd -q +1
+ else F=1 ;fi
+ pushd -q +1
  while n=${(P)i}; ((i--)) ;do
-  [[ $n != /* ]] && n="$C/$n" 
-  [[ -e $n ]] ||{ echo "cannot stat '$n'";continue}
-  [[ -d $n ]] ||{
-   echo "'$n' is not directory"
-   n=${n%/*};n=$n/
-   [[ ! -d $n || $n = $PWD ]] &&{ echo "Neither is '$n'";continue }
-   read -k1 "?But witten under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
-   [[ $o = n ]] &&continue}
-   F=1
-   pushd -q "$n" 
+  n=${n%/}
+  [[ $n != /* ]] && n="$C/$n"
+  [[ $n = $C ]] &&continue
+  [[ -d $n ]] ||{ ((F || i )) &&{
+    echo "'$n' is not an existing directory"
+    n=${n%/*}
+    [[ -d $n ]] ||{ echo "Neither is '$n'";continue;}
+    [[ $n = $C ]] &&continue
+    read -k1 "?But written under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
+    [[ $o = n ]] &&continue
+    }
+  }
+  if (( i )) ;then pushd -q "$n"
+  else
+   pushd -q -0
+   if ((F)) ;then pushd -q "$n" ;else pushd -q -0 ;fi
+   D=;break
+  fi
  done
- if ((DS));then pushd -q -0;pushd -q
- elif ((DT));then pushd -q -1
- elif ((F*DS*DT));then pushd -q ;fi
+ ((D)) &&{ pushd -q -0;pushd -q }
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd -q ~
 esac
@@ -96,8 +103,10 @@ done
 pushd -q $1
 dirs -c
 eval set -- $=o
-C=;for o;{ pushd "$o"&>/dev/null ||C=C="$C, '$o'" }
- [[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
+}
+ #2>/dev/null
+C=;for o;{ pushd -q "$o" ||C="$C, '$o'" }
+[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
 {
  read l
  d=;while read l
