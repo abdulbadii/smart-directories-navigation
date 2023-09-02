@@ -10,7 +10,7 @@ g
 go to $HOME dir.   
 
 g -   
-go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it   
+go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it, so seems identical to `g 0` behavour   
 
 g .   
 go to the earliest dir. which is the deepest dir. on dir. stack   
@@ -18,20 +18,22 @@ go to the earliest dir. which is the deepest dir. on dir. stack
 g -r   
 reverse the dir. index order and get into the earliest dir.   
 
-g {nth}   EXCEPT n=0 and n=1 
-go to the nth index of dir. stack, exception is index 1 by g 1 below
+g {nth}   
+go to the nth index of dir. stack, exception is index 0 and 1 explained below   
 
 g 0   
-go to directory on top of dir. list   
+go to directory on top of dir. list which has the index 1   
 
 g 1   
-like above, go to directory pointed by top of dir. stack and lose away current directory saving, use `g -` otherwise to keep current dir at top of dir. stack    
+like above, go to directory pointed by top of list, but ignoring current directory retention    
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
 
-g foo bar baz ...   
-go to first of the listed dir. given, i.e. foo, while the rest of list is put in dir. stack    
+g foo \[bar baz ...\]
+g . | - | 0  \[foo bar baz ...\]
+go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
+The second form, likewise but if it's optionally started with . or - or 0 option, its's accomplished first as previously described above   
 
 g 0{nth} 0{nth} ...  
 remove every given nth index of dir. stack   
