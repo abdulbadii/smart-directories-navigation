@@ -1,30 +1,31 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
-[[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))}
-}
+exec 3>&1
+{
+[[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
 case $1 in
-0) pushd 2>/dev/null;;
-0[1-9]*-) n=${1%-}; while popd +$n 2>/dev/null ;do :;done;;
-0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m 2>/dev/null ;};;
-0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) 2>/dev/null ||break;};;
+0[1-9]*-) n=${1%-}; while popd +$n ;do :;done;;
+0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
+0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
 [1-9]|[1-9][0-9])
  m=;[ -d "$1" ]&&{
-  m="Directory $1/ exists, if it's meant instead, append character '/' on CLI: m $1/\n"
-  n="Into directory $1/, since no index $1 in directory list"
- }
- if 2>/dev/null pushd "${DIRSTACK[$1]}";then popd +$(($1+1)); echo -ne $m>&2
- else [[ $m ]] &&{ pushd "$1";echo $n>&2;}
- fi;;
-1) popd 2>/dev/null;;
+  m="Directory $1/ exists, to mean it instead, append character '/' on CLI: m $1/\n"
+  n="Into directory $1/\nsince no index $1 in directory list\n";}
+ if (($1==1)) && popd;then :
+ elif pushd "${DIRSTACK[$1]}";then popd +$(($1+1))
+ elif [[ $m ]] ;then pushd "$1"; m=$n
+ else m='No index $1 in directory list nor directory $1 exists\n'
+ fi
+ echo -ne $m>&3;;
 -c) dirs -c;_DIRS=;return;;
 -r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
- ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&2;_DIRS=
+ ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
 ?*)
  if [[ `type -t "$1"` && $1 != . && -e $2 ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
   [[ -d $1 ]] &&{
-   echo "'$1' is a directory in the working dir. but it's a name of an executable too">&2
+   echo "'$1' is a directory in the working dir. but it's a name of an executable too">&3
    read -N1 -p 'Mean it as an executable or directory name (Predetermine by appending / on CLI) ? (x / ELSE KEY) ' o
    [[ $o = [xX] ]] ||{ pushd $1;F=;}
   }
@@ -35,7 +36,7 @@ case $1 in
     [[ $m = -- ]] && DNO=1
     if [[ $m =~ ^-(/.*)?$ ]];then
      args=$args\ ~-${BASH_REMATCH[1]}
-     [[ $m = */ ]] &&{ echo -n $x>&2;read -ei "$args" args;args=\ $args;}
+     [[ $m = */ ]] &&{ echo -n $x>&3;read -ei "$args" args;args=\ $args;}
     elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
      n=${BASH_REMATCH[2]}
@@ -44,7 +45,7 @@ case $1 in
      else
       if ((n<=${#DIRSTACK[@]})) ;then
        args=$args\ $f${DIRSTACK[n]}$b
-       [[ $m = */ ]] &&{ echo -n $x>&2;read -ei "$args" args;args=\ $args;}
+       [[ $m = */ ]] &&{ echo -n $x>&3;read -ei "$args" args;args=\ $args;}
       else
        echo -n "In '$m', $n is out of dir. stack range"
        [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
@@ -54,14 +55,14 @@ case $1 in
      fi
     else args=$args\ $m;fi
    }
-   echo -e "\n$x$args">&2
-   eval "$x$args">&2
+   echo -e "\n$x$args">&3
+   eval "$x$args">&3
   }
 else
- F=
- C=$PWD; i=$#
- if [[ $1 = [-.] ]] ;then
+ F=;C=$PWD; i=$#
+ if [[ $1 = [-.0] ]] ;then
    [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
+   [[ $1 = 0 ]] &&{  pushd; pushd +1; }
  else F=1
  fi
  while n=${!i}; ((i--)) ;do
@@ -74,12 +75,13 @@ else
     [[ $n = $PWD ]] &&continue
     read -N1 -p "But written under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
     [[ $o = n ]] &&continue
-    }>&2
+    }>&3
   }
   if (( i )) ;then pushd -n "$n"
   else
      if (( F )) ;then pushd "$n"
      else pushd -0 ;fi
+     break
   fi
  done
 fi;;
@@ -99,15 +101,17 @@ pushd $1
 dirs -c
 unset IFS C d
 eval set -- $o
-for o;{ pushd "$o"&>/dev/null ||C="$C, '$o'";}
-[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}">&2
-{ read l
- while read l
- do [[ $l =~ ^([1-9]+)\ +(.+) ]]
-  d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
+for o;{ pushd "$o" || C="$C, '$o'";}
+} &>/dev/null
+exec 3>&-
+[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
+{
+  read l; while read l
+  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
+   d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
 }< <(dirs -v)
 _DRS=$(echo -e "${d:+$d\n\r}")
 _DIRS=$_DRS
-((HIDIRF)) &&{ echo -n "${_DRS@P}">&2; _DIRS=;}
-}>/dev/null
+((HIDIRF)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
+}
