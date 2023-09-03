@@ -8,14 +8,13 @@ case $1 in
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
 [1-9]|[1-9][0-9])
- m=;[ -d "$1" ]&&{
+ m=;[[ -d $1 ]]&&{
   m="Directory $1/ exists, to mean it instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/\nsince no index $1 in directory list\n";}
  if (($1==1)) && popd;then :
  elif pushd "${DIRSTACK[$1]}";then popd +$(($1+1))
  elif [[ $m ]] ;then pushd "$1"; m=$n
- else m='No index $1 in directory list nor the directory exists\n'
- fi
+ else m='No index $1 in directory list nor the directory exists\n';fi
  echo -ne $m>&3;;
 -c) dirs -c;_DIRS=;return;;
 -r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
@@ -60,9 +59,11 @@ case $1 in
   }
 else
  F=;D=1;C=$PWD i=$#
- if [[ $1 = [-.0] ]] ;then
-   [[ $1 = - ]] &&{  pushd ~-; pushd +1; }
-   [[ $1 = 0 ]] &&{  pushd; pushd +1; }
+ if [[ $1 = [-.0] ]] ;then n=
+  if [[ $1 = - ]] ;then n=-
+  elif [[ $1 = 0 ]] ;then n=-0;fi
+  pushd $n
+  pushd +1
  else F=1
  fi
  while n=${!i}; ((i--)) ;do
@@ -117,9 +118,3 @@ _DRS=$(echo -e "${d:+$d\n\r}")
 _DIRS=$_DRS
 ((HIDIRF)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
 }
-
-_dir_nav_comp(){
-IFS=$'\n'
-COMPREPLY=( $(compgen -W '`compgen -d; dirs -l -p;((n=${#DIRSTACK[@]}-1));((n>1)) &&{ eval "set -- 0 {2..$n}";for i;{ echo $i;};}`' ${COMP_WORDS[COMP_CWORD]}) )
-COMPREPLY+=()
-} &&complete -o default -o nosort -F _dir_nav_comp g
