@@ -1,6 +1,6 @@
 # Bash smart directories navigation   
 Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
-It must be inside ~/.bashrc to get the executable g (stand for get in) functioning, working directly, nicely and fast in shell terminal and no DIRS shell variable else being used    
+It must be inside ~/.bashrc to get the executable g (stand for get in) functioning, working directly, nicely and fast in shell terminal and no _DIRS and _DRS shell variable writing else    
 Simply rename function name g with whatever you like; j, stand for jump into or b, stand for be in, etc    
 
 # Usage   
@@ -32,7 +32,7 @@ g foo \[bar baz ...\]
 g . | - | ,  \[foo bar baz ...\]    
 
 go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
-it may optionally started with . or - or 0 option mentioned above which'd be accomplished first (the second form)   
+it may optionally be started with . or - or , options mentioned above which'd be accomplished first (the second form)   
 
 g 0{nth} 0{nth} ...  
 remove every given nth index of dir. stack   
@@ -54,7 +54,7 @@ refresh i.e. update the prompt string of dir. stack which is cleaned up from dup
 
 g [a g option/command] 0  
 toggle hiding or showing the directory stack list ouput onto prompt string   
-if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show dir. stack list and will hide it on the next command prompt   
+if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show the list, then hide it on the next command prompt   
 so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
 
 g \<Bash command line\>   
