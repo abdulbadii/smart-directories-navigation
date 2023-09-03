@@ -16,9 +16,9 @@ g .
 go to directory on top of stack, that is the first in dir. list which has the index 1   
 
 g 1   
-like above, go to directory pointed by top of list, but ignoring current directory retention   
+like above, go to directory pointed by top of list, but will not have current directory retention   
 
-g 0   
+g ,   
 go to the last of dir. stack which has the greatest index   
 
 g {nth}   
@@ -29,7 +29,7 @@ go to the "directory_name" dir. For numerical name, suffix it with / to prevail 
 
 g foo \[bar baz ...\]    
 
-g . | - | 0  \[foo bar baz ...\]    
+g . | - | ,  \[foo bar baz ...\]    
 
 go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
 it may optionally started with . or - or 0 option mentioned above which'd be accomplished first (the second form)   
@@ -52,10 +52,10 @@ reverse the dir. index order and go to the last of dir. stack
 g ,,   
 refresh i.e. update the prompt string of dir. stack which is cleaned up from duplicate and inexistant directories   
 
-g [optionally any g option/command] ,  
+g [a g option/command] 0  
 toggle hiding or showing the directory stack list ouput onto prompt string   
 if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show dir. stack list and will hide it on the next command prompt   
-so naturally, `g ,` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
+so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
 
 g \<Bash command line\>   
 any CLI with an executable whose argument can be obtained from the dir. stack being referenced   
