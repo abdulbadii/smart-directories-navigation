@@ -4,7 +4,7 @@ It must be inside ~/.bashrc to get the executable g (stand for get in) functioni
 Simply rename function name g with whatever you like; j, stand for jump into or b, stand for be in, etc    
 
 # Usage   
-Note explanation below, each usage to mean: go to a directory, i.e. not its removal from dir. stack, etc, the first step "save the current directory onto top of dir. stack" is implied before the first one explicitly written, except the `g 1` usage   
+Note on explanation below, each usage that has meaning: *go to a directory* (i.e. not its removal from dir. stack, etc), the first step "save the current directory onto top of dir. stack" is implied before the first one explicitly written, except the `g 1` usage   
 
 g   
 go to $HOME dir.   
