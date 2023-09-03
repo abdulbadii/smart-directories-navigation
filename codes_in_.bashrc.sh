@@ -2,7 +2,7 @@ PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
 exec 3>&1
 {
-[[ ${!#} = , ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
+[[ ${!#} = 0 ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
 case $1 in
 0[1-9]*-) n=${1%-}; while popd +$n ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
@@ -18,7 +18,7 @@ case $1 in
  echo -ne $m>&3;;
 -c) dirs -c;_DIRS=;return;;
 -r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
- ,) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
+ 0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
 ?*)
@@ -59,9 +59,9 @@ case $1 in
   }
 else
  F=;D=1;C=$PWD i=$#
- if [[ $1 = [-.0] ]] ;then n=
+ if [[ $1 = [-.,] ]] ;then n=
   if [[ $1 = - ]] ;then n=-
-  elif [[ $1 = 0 ]] ;then n=-0;fi
+  elif [[ $1 = , ]] ;then n=-0;fi
   pushd $n
   pushd +1
  else F=1
