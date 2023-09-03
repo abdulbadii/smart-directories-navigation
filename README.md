@@ -32,7 +32,7 @@ g foo \[bar baz ...\]
 g . | - | 0  \[foo bar baz ...\]    
 
 go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
-it may optionally started with . or - or 0 option mentioned above which is accomplished first as previously described above   
+it may optionally started with . or - or 0 option mentioned above which'd be accomplished first (the second form)   
 
 g 0{nth} 0{nth} ...  
 remove every given nth index of dir. stack   
