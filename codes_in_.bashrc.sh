@@ -119,7 +119,7 @@ _DIRS=$_DRS
 }
 
 _dir_nav_comp(){
-326:IFS=$'\n'
-327:COMPREPLY=( $(compgen -W '`compgen -d; dirs -l -p;((n=${#DIRSTACK[@]}-1));((n>1)) &&{ eval "set -- 0 {2..$n}";for i;{ echo $i;};}`' ${COMP_WORDS[COMP_CWORD]}) )
-328:COMPREPLY+=()
-329:} &&complete -o default -o nosort -F _dir_nav_comp g
+IFS=$'\n'
+COMPREPLY=( $(compgen -W '`compgen -d; dirs -l -p;((n=${#DIRSTACK[@]}-1));((n>1)) &&{ eval "set -- 0 {2..$n}";for i;{ echo $i;};}`' ${COMP_WORDS[COMP_CWORD]}) )
+COMPREPLY+=()
+} &&complete -o default -o nosort -F _dir_nav_comp g
