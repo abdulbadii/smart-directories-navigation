@@ -10,22 +10,19 @@ g
 go to $HOME dir.   
 
 g -   
-go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it, so seems identical to `g 0` behavour   
+go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
 
 g .   
-go to the earliest dir. which is the deepest dir. on dir. stack   
+go to directory on top of stack, that is the first in dir. list which has the index 1   
 
-g -r   
-reverse the dir. index order and get into the earliest dir.   
+g 1   
+like above, go to directory pointed by top of list, but ignoring current directory retention   
+
+g 0   
+go to the last of dir. stack which has the greatest index   
 
 g {nth}   
 go to the nth index of dir. stack, exception is index 0 and 1 explained below   
-
-g 0   
-go to directory on top of dir. list which has the index 1   
-
-g 1   
-like above, go to directory pointed by top of list, but ignoring current directory retention    
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
@@ -48,7 +45,7 @@ g -c
 clean up all dir. stack   
 
 g -r   
-reverse dir. stack index order   
+reverse the dir. index order and go to the last of dir. stack
 
 g ,,   
 refresh i.e. update the prompt string of dir. stack which is cleaned up from duplicate and inexistant directories   
