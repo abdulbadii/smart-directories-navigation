@@ -22,7 +22,7 @@ g ,
 go to the last of dir. stack which has the greatest index   
 
 g {nth}   
-go to the nth index of dir. stack, exception is index 0 and 1 explained below   
+go to the nth index of dir. stack, exception is index 1 and 0 explained below   
 
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
@@ -31,7 +31,7 @@ g foo \[bar baz ...\]
 
 g . | - | ,  \[foo bar baz ...\]    
 
-go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
+likewise go to the given name foo, now just to be clearer that it's in repetitive form, being the rest put in dir. stack   
 it may optionally be started with . or - or , options mentioned above which'd be accomplished first (the second form)   
 
 g 0{nth} 0{nth} ...  
@@ -53,7 +53,7 @@ g ,,
 refresh i.e. update the prompt string of dir. stack which is cleaned up from duplicate and inexistant directories   
 
 g [a g option/command] 0  
-toggle hiding or showing the directory stack list ouput onto prompt string   
+toggle hiding or showing the directory stack list ouput on the prompt string   
 if an optional command given, execute it first before but if the toggling is to hide it'll still lastly show the list, then hide it on the next command prompt   
 so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
 
