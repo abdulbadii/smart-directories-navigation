@@ -27,11 +27,12 @@ go to the nth index of dir. stack, exception is index 0 and 1 explained below
 g {directory_name}   
 go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
 
-g foo \[bar baz ...\]   
-g . | - | 0  \[foo bar baz ...\]   
+g foo \[bar baz ...\]    
+
+g . | - | 0  \[foo bar baz ...\]    
 
 go to the given name listed dir. given i.e. foo, if it's in repetitive form, then the rest is also put in dir. stack   
-The second form, likewise but if it's optionally started with . or - or 0 option, its's accomplished first as previously described above   
+it may optionally started with . or - or 0 option mentioned above which is accomplished first as previously described above   
 
 g 0{nth} 0{nth} ...  
 remove every given nth index of dir. stack   
