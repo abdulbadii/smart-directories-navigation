@@ -22,10 +22,11 @@ case $1 in
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
 ?*)
- if [[ `type -t "$1"` && $1 != . && -e $2 ]] || ([[ $1 = . && -f $2 ]]) ;then F=1
+ if [[ `type -t "$1"` && $1 != . && $2 ]] || ([[ $1 = . && -f $2 ]]) ;then {
+  F=1
   [[ -d $1 ]] &&{
-   echo "'$1' is a directory in the working dir. but it's a name of an executable too">&3
-   read -N1 -p 'Mean it as an executable or directory name (Predetermine by appending / on CLI) ? (x / ELSE KEY) ' o
+   echo "'$1' is a directory in the working dir. but it's a name of an executable too"
+   read -N1 -p 'Mean it as an executable or directory name (Append / on CLI to determine it) ? (x / ELSE KEY) ' o
    [[ $o = [xX] ]] ||{ pushd $1;F=;}
   }
   ((F)) &&{
@@ -35,7 +36,11 @@ case $1 in
     [[ $m = -- ]] && DNO=1
     if [[ $m =~ ^-(/.*)?$ ]];then
      args=$args\ ~-${BASH_REMATCH[1]}
-     [[ $m = */ ]] &&{ echo -n $x>&3;read -ei "$args" args;args=\ $args;}
+     [[ $m = */ ]] &&{
+       echo -n $x\
+       read -ei "$args" args
+       args=\ $args
+     }
     elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
      n=${BASH_REMATCH[2]}
@@ -44,19 +49,23 @@ case $1 in
      else
       if ((n<=${#DIRSTACK[@]})) ;then
        args=$args\ $f${DIRSTACK[n]}$b
-       [[ $m = */ ]] &&{ echo -n $x>&3;read -ei "$args" args;args=\ $args;}
+       [[ $m = */ ]] &&{
+        echo -n $x
+        read -ei "$args" args
+        args=\ $args
+        }
       else
-       echo -n "In '$m', $n is out of dir. stack range"
-       [[ -d $m ]] && echo ", while it's a directory. Not proceeding it"
-       echo -e "\nTo predetermine a number in argument is a directory, append '/' on CLI:\n'$f$n/$b'"
+       echo "In '$m', $n is out of range"
+       [[ -d $n ]] && echo -e "While it's a directory. Not proceeding it\nTo predetermine a number is a directory name, append '/' on CLI:\n'$f$n/$b'"
        continue
       fi
      fi
     else args=$args\ $m;fi
    }
-   echo -e "\n$x$args">&3
-   eval "$x$args">&3
+   echo -e "\e[1;37m$x$args\e[m"
+   eval "$x$args"
   }
+ }>&3 2>&3
 else
  F=;D=1;C=$PWD i=$#
  if [[ $1 = [-.,] ]] ;then n=
@@ -76,8 +85,9 @@ else
     n=${n%/*}
     [[ ! -d $n ]] &&{ echo "Neither is '$n'";continue;}
     [[ $n = $C ]] &&continue
-    read -N1 -p "But written under existing directory '$n', put it on stack? (n: No. ELSE KEY: Yes) " o;echo
-    [[ $o = n ]] &&continue
+    2>&3 read -N1 -t 2.5 -p "But under existing directory '$n', put it on stack? (n: No. ELSE/DEFAULT: Yes) " o &&
+     [[ $o = n ]] &&{ echo;continue;}
+     echo
     }>&3
   }
   if (( i )) ;then pushd -n "$n"
@@ -114,7 +124,7 @@ exec 3>&-
    d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
 }< <(dirs -v)
-_DRS=$(echo -e "${d:+$d\n\r}")
+_DRS=$(echo -e "${d:+${d% }\n\r}")
 _DIRS=$_DRS
 ((HIDIRF)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
 }
