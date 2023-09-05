@@ -30,37 +30,31 @@ case $1 in
    [[ $o = [xX] ]] ||{ pushd $1;F=;}
   }
   ((F)) &&{
-   x=$1;shift;args=;DNO=
-   [[ $1 = . ]] &&{ args=\ ${DIRSTACK[@]: -1};shift;}
+   x=$1;shift
+   args=;DNO=
    for m;{
-    [[ $m = -- ]] && DNO=1
-    if [[ $m =~ ^-(/.*)?$ ]];then
-     args=$args\ ~-${BASH_REMATCH[1]}
-     [[ $m = */ ]] &&{
-       echo -n $x\
-       read -ei "$args" args
-       args=\ $args
-     }
-    elif [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
+    if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*)([1-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
      n=${BASH_REMATCH[2]}
-     b=${BASH_REMATCH[3]%/}
-     if [[ $b =~ ^$|^//. ]] ;then args=$args\ $f$n${b/\/\//\/}
+     b=${BASH_REMATCH[3]}
+     if [[ $b =~ ^/$|^//[^/] ]] ;then args=$args\ $f$n${b/\/\//\/}
      else
-      if ((n<=${#DIRSTACK[@]})) ;then
-       args=$args\ $f${DIRSTACK[n]}$b
-       [[ $m = */ ]] &&{
+      if ((n<${#DIRSTACK[@]})) ;then
+       args=$args\ $f${DIRSTACK[n]}${b%/}
+       [[ $b = *// ]] &&{
         echo -n $x
         read -ei "$args" args
         args=\ $args
-        }
+       }
       else
        echo "In '$m', $n is out of range"
        [[ -d $n ]] && echo -e "While it's a directory. Not proceeding it\nTo predetermine a number is a directory name, append '/' on CLI:\n'$f$n/$b'"
        continue
       fi
      fi
-    else args=$args\ $m;fi
+    else
+     [[ $m = -- ]] && DNO=1
+     args=$args\ $m;fi
    }
    echo -e "\e[1;37m$x$args\e[m"
    eval "$x$args"
