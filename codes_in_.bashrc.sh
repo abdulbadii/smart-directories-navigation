@@ -11,7 +11,7 @@ case $1 in
  m=;[[ -d $1 ]]&&{
   m="Directory $1/ exists, to mean it instead, append character '/' on CLI: m $1/\n"
   n="Into directory $1/\nsince no index $1 in directory list\n";}
- if (($1==1)) && popd;then :
+ if (($1==1));then popd
  elif pushd "${DIRSTACK[$1]}";then popd +$(($1+1))
  elif [[ $m ]] ;then pushd "$1"; m=$n
  else m='No index $1 in directory list nor the directory exists\n';fi
