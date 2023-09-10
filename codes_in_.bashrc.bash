@@ -83,7 +83,7 @@ else
      if (( F )) ;then pushd "$n" ;else pushd -0 ;fi; D=;break
    fi
   done
-  ((D)) &&pushd
+  ((D&&!F)) &&pushd
 fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
