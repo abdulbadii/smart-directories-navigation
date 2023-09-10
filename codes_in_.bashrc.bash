@@ -49,13 +49,13 @@ elif [[ $1 =~ ^[1-9][0-9]?(/)?$ ]] &&(($#==1)) ;then
  elif (($1==1)) ;then popd
  else
   m=;[[ -d $1 ]]&&{
-  m="Directory $1/ exists, to mean it instead, append character / on CLI:  $1/"
-  n="Into directory $1/ since no index $1 in directory list";}
+  m="Directory $1/ exists, to mean it instead, append character / on CLI:  $1/\n"
+  n="Into directory $1/ since no index $1 in directory list\n";}
   u=${DIRSTACK[$1]}
   if [[ $u ]] ;then pushd $u;popd +$(($1+1))
   elif [[ $m ]] ;then pushd $1;m=$n
-  else m="No index $1 in directory list nor the directory $1/ exists";fi
-  echo "$m">&3
+  else m="No index $1 in directory list nor the directory $1/ exists\n";fi
+  echo -en "$m">&3
  fi
 else
   F=;D=1;C=$PWD i=$#
