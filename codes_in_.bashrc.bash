@@ -8,16 +8,16 @@ case $1 in
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
 -c) dirs -c;_DIRS=;return;;
--r) for i in ${DIRSTACK[@]};{ pushd "$i" ;};;
+-r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
  0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
 ?*)
-if [[ `type -t "$1"` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
+if [[ `type -t $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-   read -N1 -p 'Mean it as an executable or directory name (Append / on CLI to determine it) ? (x / ELSE KEY) ' o
+   read -N1 -p "Is it meant as executable or directory name which should've had suffix / on CLI?  (x / ELSE KEY) " o
    [[ $o = [xX] ]] ||{ pushd $1;F=;}
   }
   ((F)) &&{
@@ -28,7 +28,7 @@ if [[ `type -t "$1"` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
      f=${BASH_REMATCH[1]}
      n=${BASH_REMATCH[2]}
      b=${BASH_REMATCH[3]}
-     if [[ $b =~ ^/$|^//[^/] ]] ;then args=$args\ $f$n${b/\/\//\/}
+     if [[ $b = @(/|//?*) ]] ;then args=$args\ $f$n${b/\/\//\/}
      else
       if ((n<${#DIRSTACK[@]})) ;then
        args=$args\ $f${DIRSTACK[n]}${b%/}
@@ -44,7 +44,7 @@ if [[ `type -t "$1"` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
    eval "$x$args"
   }
   }>&3 2>&3
-elif [[ $1 =~ ^[1-9][0-9]?(/)?$ ]] &&(($#==1)) ;then
+elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
  if [[ ${BASH_REMATCH[1]} ]] ;then pushd $1 ||echo $1 is not a directory>&3
  elif (($1==1)) ;then popd
  else
@@ -78,9 +78,9 @@ else
       echo
      }>&3
    }
-   if (( i )) ;then pushd -n "$n"
+   if ((i)) ;then pushd -n "$n"
    else
-     if (( F )) ;then pushd "$n" ;else pushd -0 ;fi; D=;break
+     if ((F)) ;then pushd "$n" ;else pushd -0 ;fi; D=;break
    fi
   done
   ((D&&!F)) &&pushd
@@ -104,10 +104,10 @@ eval set -- $o
 for o;{ pushd "$o" 2>&3 ||C="$C, '$o'";}
 } &>/dev/null
 exec 3>&-
-[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C/,/}"
+[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C#,}"
 {
   read l; while read l
-  do [[ $l =~ ^([1-9]+)\ +(.+) ]]
+  do [[ $l =~ ^([1-9][0-9]?)[[:space:]]+(.+) ]]
    d="$d\e[41;1;37m${BASH_REMATCH[1]}\e[40;1;32m${BASH_REMATCH[2]}\e[m "
  done
 }< <(dirs -v)
