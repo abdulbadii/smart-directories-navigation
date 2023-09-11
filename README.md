@@ -50,15 +50,15 @@ g -r
 reverse the dir. index order and go to the last of dir. stack
 
 g ,,   
-refresh i.e. update the prompt string of dir. stack which is cleaned up from duplicate and inexistant directories   
+refresh i.e. update the prompt string of dir. stack which is cleaned up from any duplicate and inexistant directory   
 
 g [a g option/command]  0  
 toggle hiding or showing the directory stack list ouput on the prompt string   
-if an optional command given, execute it first before the toggling, then if it is to hide it'd still lastly show the list, and then hide it on the next command prompt   
-so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
+if an optional command given, execute it first before the toggling, if it is to hide it'd still lastly be shown the list after which it'd be hidden on the next command prompt   
+so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all going into $HOME directory first   
 
 g \<a shell command line\>   
 any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
 on purpose of get more its various selection and navigation, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
 
-## That is the most useful feature which perfected with its auto completion capability by copying file Bash_compoletion into ~/.bashrc
+## That is the most useful feature which would be perfected with its auto completion capability by copying file Bash_auto-completion into ~/.bashrc
