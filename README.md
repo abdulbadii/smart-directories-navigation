@@ -10,10 +10,10 @@ g
 go to $HOME dir.   
 
 g -   
-go back to the last dir. from where previously working directory (as opposed to g 1 below), if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
+go back to the last dir. from where previously working directory, if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
 
 g .   
-go to directory on top of stack, that is the first in dir. list which has the index 1   
+go to directory on top of stack which is the first of dir. list (as opposed to g 1 below)     
 
 g 1   
 like above, go to directory pointed by top of list, but will not have current directory retained   
@@ -58,6 +58,7 @@ if an optional command given, execute it first before the toggling, then if it i
 so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all to go into $HOME directory first   
 
 g \<a shell command line\>   
-any CLI with an executable whose argument can be obtained from the dir. stack by which it is referenced   
-on purpose of get more its various selection, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
+any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
+on purpose of get more its various selection and navigation, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
 
+## That is the most useful feature which perfected with its auto completion capability by copying file Bash_compoletion into ~/.bashrc
