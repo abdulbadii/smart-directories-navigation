@@ -1,7 +1,6 @@
 dircomp(){
 local -n CWidx=COMP_CWORD words=COMP_WORDS
-local now=${words[CWidx]} \
-pre=${words[CWidx-1]} TYP=-d
+local now=${words[CWidx]} pre=${words[CWidx-1]} TYP=-d
 ((CWidx>1)) &&type -t -- ${words[1]} &&TYP=-f
 IFS=$'\n'
 if [[ $now = ../* ]] ;then
@@ -12,8 +11,8 @@ elif [[ $now =~ ^([^1-9]*/)?([1-9][0-9]?)(.*) ]] ;then
  n=${BASH_REMATCH[2]}
  u=${DIRSTACK[n]}
  if [[ -d $f$n ]] &&[[ $b = @(/|//[!/]*) || -z $u ]] ;then
-  [[ -z $u ]] &&b+=/
-  COMPREPLY=( $(compgen -d $f$n${b/\/\//\/}) )
+  b=${b#/}
+  COMPREPLY=( $(compgen -d $f$n/${b#/}) )
  elif [[ $u ]] ;then
    u=$f$u
    COMPREPLY=( $(compgen -d $u$b/) )
