@@ -1,5 +1,6 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
+local C DNO F D args d f b m n i o x
 exec 3>&1
 {
 [[ ${!#} = 0 ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
@@ -9,11 +10,21 @@ case $1 in
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
  0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
-,,);;
 -c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
+--) C=$PWD
+ while read -r n
+ do eval set -- $n
+   for i;{
+     [[ $i =~ /?[a-z]+(/[a-z]+)* ]] &&{
+      [[ $i = /* ]] || i=$C/$i
+      if [[ -d $i && $i != $PWD ]] ;then pushd "$i"
+      else i=${i%/*}; [[ -d $i && $i != $PWD ]] &&pushd "$i" ;fi
+     };}
+ done< <(history 4);;
+,,);;
 -r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
-if [[ `type -t $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
+if [[ `type -t -- $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
@@ -88,8 +99,8 @@ fi;;
 *) [[ $HOME = $PWD ]] ||pushd ~
 esac
 IFS=$'\n'
-l=`dirs -l -p`
-d=$'\n'${l//$'\n'/$'\n\n'}$'\n'
+d=`dirs -l -p`
+d=$'\n'${d//$'\n'/$'\n\n'}$'\n'
 o=
 while :
 do set -- $d
