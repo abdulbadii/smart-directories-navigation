@@ -7,18 +7,18 @@ case $1 in
 0[1-9]*-) n=${1%-}; while popd +$n ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
--c) dirs -c;_DIRS=;return;;
--r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
  0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 ,,);;
+-c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
+-r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
 if [[ `type -t $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   F=1
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
    read -N1 -p "Is it meant as executable or directory name which should've had suffix / on CLI?  (x / ELSE KEY) " o
-   [[ $o = [xX] ]] ||{ pushd $1;F=;}
+   [[ $o = [xX] ]] ||{ pushd "$1";F=;}
   }
   ((F)) &&{
    x=$1;shift
@@ -26,9 +26,9 @@ if [[ `type -t $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
    for m;{
     if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*/)?([1-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
-     n=${BASH_REMATCH[2]}
      b=${BASH_REMATCH[3]}
-     if [[ $b = @(/|//?*) ]] ;then args=$args\ $f$n${b/\/\//\/}
+     n=${BASH_REMATCH[2]}
+     if [[ $b = @(/|//[!/]*) ]] ;then args=$args\ $f$n${b/\/\//\/}
      else
       if ((n<${#DIRSTACK[@]})) ;then
        args=$args\ $f${DIRSTACK[n]}${b%/}
@@ -45,14 +45,14 @@ if [[ `type -t $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   }
   }>&3 2>&3
 elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
- if [[ ${BASH_REMATCH[1]} ]] ;then pushd $1 ||echo $1 is not a directory>&3
+ if [[ ${BASH_REMATCH[1]} ]] ;then pushd $1 ||echo $1/ is not a directory>&3
  elif (($1==1)) ;then popd
  else
   m=;[[ -d $1 ]]&&{
   m="Directory $1/ exists, to mean it instead, append character / on CLI:  $1/\n"
   n="Into directory $1/ since no index $1 in directory list\n";}
   u=${DIRSTACK[$1]}
-  if [[ $u ]] ;then pushd $u;popd +$(($1+1))
+  if [[ $u ]] ;then pushd "$u";popd +$(($1+1))
   elif [[ $m ]] ;then pushd $1;m=$n
   else m="No index $1 in directory list nor the directory $1/ exists\n";fi
   echo -en "$m">&3
@@ -97,12 +97,12 @@ do set -- $d
  [[ $d ]] || break
  o="'$1' $o"
 done
-pushd $1
+pushd "$1"
 dirs -c
 unset IFS C d
 eval set -- $o
 for o;{ pushd "$o" 2>&3 ||C="$C, '$o'";}
-} &>/dev/null
+}&>/dev/null
 exec 3>&-
 [[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C#,}"
 {
