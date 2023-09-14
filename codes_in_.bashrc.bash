@@ -11,7 +11,7 @@ case $1 in
  0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 -c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
---?([4-9]|[1-9][0-9])) n=${1#--}
+--?([5-9][0-9]*)) n=${1#--}
  C=$PWD
  while read -r m
  do eval set -- $m
@@ -21,7 +21,7 @@ case $1 in
       if [[ -d $i && $i != $C ]] ;then pushd -n "$i"
       else i=${i%/*}; [[ -d $i && $i != $C ]] &&pushd -n "$i" ;fi
      };}
- done< <(history $((${n:=3}+1))); pushd;;
+ done< <(history $((${n:=49}+1))); pushd;;
 ,,);;
 -r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
