@@ -11,16 +11,17 @@ case $1 in
  0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 -c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
---) C=$PWD
- while read -r n
- do eval set -- $n
+--?([4-9]|[1-9][0-9])) n=${1#--}
+ C=$PWD
+ while read -r m
+ do eval set -- $m
    for i;{
      [[ $i =~ /?[a-z]+(/[a-z]+)* ]] &&{
       [[ $i = /* ]] || i=$C/$i
-      if [[ -d $i && $i != $PWD ]] ;then pushd "$i"
-      else i=${i%/*}; [[ -d $i && $i != $PWD ]] &&pushd "$i" ;fi
+      if [[ -d $i && $i != $C ]] ;then pushd -n "$i"
+      else i=${i%/*}; [[ -d $i && $i != $C ]] &&pushd -n "$i" ;fi
      };}
- done< <(history 4);;
+ done< <(history $((${n:=3}+1))); pushd;;
 ,,);;
 -r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
@@ -69,7 +70,7 @@ elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
   echo -en "$m">&3
  fi
 else
-  F=;D=1;C=$PWD i=$#
+  F=;D=1; C=$PWD; i=$#
   if [[ $1 = [-.,] ]] ;then n=
    if [[ $1 = - ]] ;then n=-;elif [[ $1 = , ]] ;then n=-0;fi
    pushd $n;pushd +1
