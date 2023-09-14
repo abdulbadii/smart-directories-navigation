@@ -57,11 +57,11 @@ toggle hiding or showing the directory stack list ouput on the prompt string
 if an optional command given, execute it first before the toggling, if it is to hide it'd still lastly be shown the list after which it'd be hidden on the next command prompt   
 so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all going into $HOME directory first   
 
-g --   
-retrieve any directory path written within the last 3 lines of command history, or if it's non directory then get the directory homing it, so then push each into directory stack   
+g --[n]   
+retrieve any directory path written within the last 3 (or a specified n) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
 
 g \<a shell command line\>   
 argument is any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
 on purpose of get more its various selection and navigation, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
 
-## That is the most useful feature which would be perfected with its auto completion capability by copying file Bash_auto-completion into ~/.bashrc
+## This'd be the most useful feature which would be perfected with its auto completion capability by copying file Bash_auto-completion into ~/.bashrc
