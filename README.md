@@ -58,7 +58,7 @@ if an optional command given, execute it first before the toggling, if it is to 
 so naturally, `g 0` is merely to toggle hide or show the directory stack list, not at all going into $HOME directory first   
 
 g --[n]   
-retrieve any directory path written within the last 3 (or a specified n) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
+retrieve any directory path written within the last 49 (or a specified n number of) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
 
 g \<a shell command line\>   
 argument is any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
