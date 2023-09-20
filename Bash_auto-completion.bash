@@ -20,7 +20,7 @@ elif [[ $now ]]  ;then
   COMPREPLY=( $(compgen -o dirnames $T -- $now) )
 else
   exec 3< <(dirs -l -p)
-  compopt -o nosort
+  compopt -o nospace
   COMPREPLY=( $(read -u3;while read -u3 d; f=$?;read w || ((! f)) ;do echo ${d// /\\ }${d:+/};echo ${w// /\\ }${w:+/} ;done< <(compgen -d)
   if((CWidx==1)) ;then compgen -c; else for n in *;{ [[ -f $n ]] &&printf %s\\n "$n" ;};fi ) )
   exec 3>&-
