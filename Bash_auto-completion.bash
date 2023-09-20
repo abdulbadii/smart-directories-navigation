@@ -13,14 +13,14 @@ elif [[ $now =~ ^([^1-9]*/)?([1-9][0-9]?)(.*) ]] ;then
   [[ -d $f$n ]] &&{
    b=${b#/}
    COMPREPLY=( $(compgen -d $f$n/${b#/}) );}
- else compopt -o nosort
+ else compopt -o nospace
   COMPREPLY=( "$f${DIRSTACK[n]// /\\ }$b" $(compgen -d $f${DIRSTACK[n]}$b/) )
  fi
 elif [[ $now ]]  ;then
   COMPREPLY=( $(compgen -o dirnames $T -- $now) )
 else
   exec 3< <(dirs -l -p)
-  compopt -o nospace
+  compopt -o nosort
   COMPREPLY=( $(read -u3;while read -u3 d; f=$?;read w || ((! f)) ;do echo ${d// /\\ }${d:+/};echo ${w// /\\ }${w:+/} ;done< <(compgen -d)
   if((CWidx==1)) ;then compgen -c; else for n in *;{ [[ -f $n ]] &&printf %s\\n "$n" ;};fi ) )
   exec 3>&-
