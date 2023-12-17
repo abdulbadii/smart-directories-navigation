@@ -10,8 +10,12 @@ case $now in
   f=${BASH_REMATCH[1]}
   n=${BASH_REMATCH[2]}
   b=${BASH_REMATCH[3]}
-  if [[ $f || $b = @(/|//[!/]*) ]] || ((n>=${#DIRSTACK[@]})) ;then
-   [[ -d $f$n ]] &&{ b=${b#/}; COMPREPLY=( $(compgen -d $f$n/${b#/}) );}
+  if [[ $f || $b ]] ;then
+    [[ $b != /* ]] && COMPREPLY=( $(compgen -d $f$n$b) )
+  elif ((n>=${#DIRSTACK[@]})) ;then
+    [[ -d $f$n ]] &&{
+      b=${b#/}
+      COMPREPLY=( $(compgen -d $f$n/${b#/}) );}
   else
    COMPREPLY=(  $(compgen -d $f${DIRSTACK[n]}$b) )
   fi;;
