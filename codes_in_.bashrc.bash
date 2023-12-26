@@ -1,6 +1,6 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
-local C DNO F D args d f b m n i o x
+local C DNO F D arg args d f b m n i o x
 exec 3>&1
 {
 [[ ${!#} = 0 ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
@@ -8,10 +8,10 @@ case $1 in
 0[1-9]*-) n=${1%-}; while popd +$n ;do :;done;;
 0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
 0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
- 0) if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
+0)if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
   else _DIRS=$_DRS ;fi;return;;
 -c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
---?([5-9][0-9]*)) n=${1#--}
+--?([1-9]*)) n=${1#--}
  C=$PWD
  while read -r m
  do eval set -- $m
@@ -25,35 +25,36 @@ case $1 in
 ,,);;
 -r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
-if [[ `type -t -- $1` && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   F=1
+if [[ $(type -t -- $1) && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
   [[ -d $1 ]] &&{
    echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-   read -N1 -p "Is it meant as executable or directory name which should've had suffix / on CLI?  (x / ELSE KEY) " o
+   read -N1 -p "Is it meant as executable or directory name which should've been added / on CLI?  (x or ELSE KEY) " o
    [[ $o = [xX] ]] ||{ pushd "$1";F=;}
   }
   ((F)) &&{
    x=$1;shift
-   args=;DNO=
+   args=();DNO=
    for m;{
     if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*/)?([1-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
      b=${BASH_REMATCH[3]}
      n=${BASH_REMATCH[2]}
-     if [[ $b = @(/|//[!/]*) ]] ;then args=$args\ $f$n${b/\/\//\/}
+     if [[ $b = @(/|//[!/]*) ]] ;then args+=(\'$f$n${b/\/\//\/}\')
      else
       if ((n<${#DIRSTACK[@]})) ;then
-       args=$args\ $f${DIRSTACK[n]}${b%/}
+       args+=(\'$f${DIRSTACK[n]}${b%/}\')
        [[ $b = *// ]] &&{
-        echo -n $x; read -ei "$args" args;args=\ $args;}
+        echo -n $x; read -ei "${args[@]}" arg; args=($arg)
+        }
       else
-       echo "$n is out of range. Aborted. To mean it as literal name, append '/' on CLI:  '$f$n/$b'";return
+       echo "$n is out of dir. stack range. Aborted. To mean it as literal name, append '/' on CLI:  '$f$n/$b'";return
       fi
      fi
-    else [[ $m = -- ]] &&DNO=1; args=$args\ $m;fi
+    else [[ $m = -- ]] &&DNO=1; args+=(\'$m\');fi
    }
-   echo -e "\e[1;37m$x$args\e[m"
-   eval "$x$args"
+   echo -e "\e[1;37m$x ${args[@]}\e[m"
+   eval $x ${args[@]}
   }
   }>&3 2>&3
 elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
