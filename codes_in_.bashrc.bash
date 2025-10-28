@@ -1,4 +1,4 @@
-PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
+PS1='$_DIRS\[\e[41;1;37m\]\w\[\e[m\]\n\[\e[40;1;33m\]\$\[\e[m\] '
 g(){
 local C DNO F D arg args d f b m n i o x RE=1
 exec 3>&1
