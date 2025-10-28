@@ -1,17 +1,26 @@
 PS1='`echo -e "$DIRS"`\[\e[41;1;37m\]\w\[\e[40;1;33m\]\n\$\[\e[m\] '
 g(){
-local C DNO F D arg args d f b m n i o x
+local C DNO F D arg args d f b m n i o x RE=1
 exec 3>&1
 {
-[[ ${!#} = 0 ]] &&{ ((HIDIRF=1-HIDIRF));(($#>1)) &&set -- ${@:1:(($#-1))};}
+[[ ${!#} = -0 ]] &&{
+ ((HID=1-HID))
+ if ((HID)) ;then
+  { echo -ne "DIRECTORY STACK LIST IS HIDDEN NOW\r";sleep 1.1;echo -ne "\e[K" ;}>&3
+  _DIRS=
+ else _DIRS=$_DRS ;fi
+ (($#==1)) && return 0
+ set -- ${@:1:(($#-1))}
+}
 case $1 in
-0[1-9]*-) n=${1%-}; while popd +$n ;do :;done;;
-0[1-9]*-[1-9]*) m=${1%-*};n=${1#*-}; for((i=n-m;i>=0;--i)) ;{ popd +$m ;};;
-0[1-9]*) i=;for n;{ [[ $n = 0[1-9]* ]] ||break; popd +$((n-i++)) ||break;};;
-0)if ((HIDIRF)) ;then echo NOW DIRECTORY STACK LIST IS HIDDEN>&3;_DIRS=
-  else _DIRS=$_DRS ;fi;return;;
 -c) dirs -c;_DIRS=;  shift;(($#))&&m "$@";return;;
---?([1-9]*)) n=${1#--}
+-[1-9]*([0-9])) i=;for n;{ popd +$((${n#-}-i++)) ||break;};;
+-[1-9]*([0-9])-) n=${1//-}; while popd +$n ;do :;done;;
+-[1-9]*([0-9])-[1-9]*([0-9]))
+	m=${1%-*}; m=${m#-}
+	n=${1##*-}
+	for((i=n-m; i>=0; --i)) ;{ popd +$m ;};;
+--?([1-9]*([0-9]))) n=${1#--}
  C=$PWD
  while read -r m
  do eval set -- $m
@@ -26,17 +35,17 @@ case $1 in
 -r) pushd;n=${#DIRSTACK[@]};for((i=2;i<n;));{ pushd "${DIRSTACK[i]}";popd +$((++i));};;
 ?*)
   F=1
-if [[ $(type -t -- $1) && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
+if [[ $(type -t -- $1) && $2 && $1 != . ]] || [[ $1 = . && -f $2 ]] ;then {
   [[ -d $1 ]] &&{
-   echo "'$1' is a directory in the working dir. but it's a name of an executable too"
-   read -N1 -p "Is it meant as executable or directory name which should've been added / on CLI?  (x or ELSE KEY) " o
+   echo "'$1' is a directory in the working dir. but it's an executable name too"
+   read -N1 -p "Is it meant as executable or directory name (to mean so append '/' in CLI) ?  (x or ELSE KEY) " o
    [[ $o = [xX] ]] ||{ pushd "$1";F=;}
   }
   ((F)) &&{
    x=$1;shift
    args=();DNO=
    for m;{
-    if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^1-9]*/)?([1-9][0-9]?)(.*) ]] ;then
+    if [[ $m != -* ]] || ((DNO)) && [[ $m =~ ^([^0-9]*/)?([0-9][0-9]?)(.*) ]] ;then
      f=${BASH_REMATCH[1]}
      b=${BASH_REMATCH[3]}
      n=${BASH_REMATCH[2]}
@@ -47,17 +56,18 @@ if [[ $(type -t -- $1) && $1 != . && $2 ]] || [[ $1 = . && -f $2 ]] ;then {
        [[ $b = *// ]] &&{
         echo -n $x; read -ei "${args[@]}" arg; args=($arg)
         }
-      else
-       echo "$n is out of dir. stack range. Aborted. To mean it as literal name, append '/' on CLI:  '$f$n/$b'";return
+      else echo "$n is out of dir. stack range. Aborted. To mean it as literal name, append '/' at the end:  '$f$n/$b'";return
       fi
      fi
     else [[ $m = -- ]] &&DNO=1; args+=(\'$m\');fi
    }
-   echo -e "\e[1;37m$x ${args[@]}\e[m"
-   eval $x ${args[@]}
+   h=($x ${args[@]})
+   echo -e "\e[1;37m${h[@]}\e[m";eval ${h[@]}
+   history -d -1
+   history -s ${h[@]}
   }
   }>&3 2>&3
-elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
+elif (($#==1)) &&[[ $1 =~ ^[0-9][0-9]?(/)?$ ]] ;then
  if [[ ${BASH_REMATCH[1]} ]] ;then pushd $1 ||echo $1/ is not a directory>&3
  elif (($1==1)) ;then popd
  else
@@ -65,8 +75,8 @@ elif (($#==1)) &&[[ $1 =~ ^[1-9][0-9]?(/)?$ ]] ;then
   m="Directory $1/ exists, to mean it instead, append character / on CLI:  $1/\n"
   n="Into directory $1/ since no index $1 in directory list\n";}
   u=${DIRSTACK[$1]}
-  if [[ $u ]] ;then pushd "$u";popd +$(($1+1))
-  elif [[ $m ]] ;then pushd $1;m=$n
+  if [[ $u ]] ;then pushd "$u";((RE= $? & RE)); popd +$(($1+1))
+  elif [[ $m ]] ;then pushd $1;((RE= $? & RE)) ;m=$n
   else m="No index $1 in directory list nor the directory $1/ exists\n";fi
   echo -en "$m">&3
  fi
@@ -91,33 +101,35 @@ else
       echo
      }>&3
    }
-   if ((i)) ;then pushd -n "$n"
-   else
-     if ((F)) ;then pushd "$n" ;else pushd -0 ;fi; D=;break
+   if ((i)) ;then pushd -n "$n" ;((RE= $? & RE))
+   else D=
+     if ((F)) ;then pushd "$n" ;else pushd -0 ;fi ;((RE= $? & RE))
+     break
    fi
   done
   ((D&&!F)) &&pushd
 fi;;
-*) [[ $HOME = $PWD ]] ||pushd ~
+*) [[ $PWD = $HOME ]] ||{ pushd ~; (( RE=$? &RE)) ;}
 esac
-IFS=$'\n'
+[[ ${DIRSTACK[1]} = /home/$USER ]] &&popd +1 
+o=;IFS=$'\n'
 d=`dirs -l -p`
 d=$'\n'${d//$'\n'/$'\n\n'}$'\n'
-o=
 while :
 do set -- $d
 	d=${d//$'\n'$1$'\n'}
- [[ $d ]] || break
- o="'$1' $o"
+	[[ $d ]] || break
+	o="'$1' $o"
 done
 pushd "$1"
 dirs -c
 unset IFS C d
 eval set -- $o
-for o;{ pushd "$o" 2>&3 ||C="$C, '$o'";}
-}&>/dev/null
+for o;{	pushd "$o" 2>&3 ||C="$C, '$o'" 
+}
+} &>/dev/null
 exec 3>&-
-[[ $C ]]&&echo "Supposedly, but not being kept in dir. stack:${C#,}"
+[[ $C ]]&&echo "Directory that's gone:${C#,}"
 {
   read l; while read l
   do [[ $l =~ ^([1-9][0-9]?)[[:space:]]+(.+) ]]
@@ -126,5 +138,6 @@ exec 3>&-
 }< <(dirs -v)
 _DRS=$(echo -e "${d:+${d% }\n\r}")
 _DIRS=$_DRS
-((HIDIRF)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
+((HID)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
+return $RE
 }
