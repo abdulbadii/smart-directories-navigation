@@ -17,7 +17,7 @@ case $1 in
 -[1-9]*([0-9])-[1-9]*([0-9]))
 	m=${1%-*}; m=${m#-;};	n=${1##*-}
 	for((i=n-m; i>=0; --i)) ;{ popd +$m ;};;
--h)	n=${1#--};	C=$PWD
+-h*([1-9]))	n=${1#-h};	C=$PWD
 	while read -r m;	do eval set -- $m
 	for i;{
 		[[ $i =~ /?[a-z]+(/[a-z]+)* ]] &&{
@@ -132,3 +132,4 @@ _DIRS=$_DRS
 ((HID)) &&{ echo -n "${_DRS@P}"; _DIRS=;}
 return $RE
 }
+shopt -s extglob   
