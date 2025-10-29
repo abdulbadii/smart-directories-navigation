@@ -1,13 +1,13 @@
 # Bash smart directories navigation   
 Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
-It must be inside ~/.bashrc to get the executable g (stand for get in) functioning, working directly, nicely and fast in shell terminal and no _DIRS and _DRS shell variable writing else    
-Simply rename function name g with whatever you like; j, stand for jump into or b, stand for be in, etc    
+It must be inside ~/.bashrc to have the function g (stand for get in) working nicely, fast in Linux shell terminal provided that no other _DIRS and _DRS shell variables writing    
+So just rename function name g with whatever you like; j (jump into), or b (be in), etc    
 
 # Usage   
-Note on explanation below, each usage that means: *go to a directory* (i.e. not its removal from dir. stack, etc), the first step *save the current directory onto top of dir. stack* is implied before the first one explicitly written, except the `g 1` usage   
+Note on explanation below, each usage that means: *go to a directory* (i.e. not its removal from dir. stack, etc), implies the first step *save the current directory onto top of dir. stack*, except if it's user home since do `g <ENTER>` is simpler than any work else, before the explicitly written step, and except the `g 1` usage   
 
 g   
-go to $HOME dir.   
+go to $HOME directory   
 
 g -   
 go back to the last dir. from where previously working directory, if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
@@ -34,7 +34,7 @@ g . | - | ,  \[foo bar baz ...\]
 likewise go to given directory namedly foo performing the first `g {directory}` usage, only now to be clearer that it may be in repetition form, withg all the rest put in dir. stack   
 it may optionally be started with . or - or , options mentioned above which'd be accomplished first (the second form)   
 
-g -{nth}[-[{nth}]] ...  
+g -{n}[-[{n}]] | --{n} ...  
 remove every given nth index, by single ones or range, of dir. stack   
 
 g -c   
@@ -51,15 +51,12 @@ toggle hiding or showing the directory stack list ouput on the prompt string
 if an optional command given, execute it first before the toggling, if it is to hide it'd still lastly be shown the list after which it'd be hidden on the next command prompt   
 so naturally, `g -0` is merely to toggle hide or show the directory stack list, not at all going into $HOME directory first   
 
-g --[n]   
-retrieve any directory path written within the last 49 (or a specified n number of) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
+g -h[n]   
+retrieve any directory path written in the past 49 (or n number specified of) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
 
 g \<a shell command line\>   
 argument is any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
 on purpose of get more its various selection and navigation, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
 
 #### This'd be the most useful feature which would be perfected with its auto completion capability   
-by copying file Bash_auto-completion into ~/.bashrc
-
-
-
+by copying file Bash_auto-completion into ~/.bashrc   
