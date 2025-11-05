@@ -4,38 +4,36 @@ It must be inside ~/.bashrc to have the function g (stand for get in) working ni
 So just rename function name g to whatever you like; j (jump into), or b (be in), etc    
 
 # Usage   
-Note on explanation below, each usage that means: *go to a directory*, i.e. not its removal from dir. stack, etc, implies the first step *save the current directory onto top of dir. stack* before the following explicit steps explanation except on `g 1` (its usage informed below) and except if current working directory is user home, since a `g <ENTER>` is simpler than any else) , and   
+Note on explanation below, each usage that means: *go to a directory*, i.e. not its removal from dir. stack, etc, implies the first step *save the current directory onto top of dir. stack* before the following explicit steps explanation except on `g 1` (its usage informed below) and except if current working directory is user home since `g <ENTER>` is simpler
 
 g   
 go to $HOME directory   
 
 g .   
-go to directory on top (the first) of directory stack (as opposed to g 1 below)     
+go to directory on top (the first) of directory stack as opposed to g 1 below     
 
 g 1   
 like above, but renouncing, i.e. not retaining, current directory    
 
 g -   
-go back to the last dir. from where previously working directory, if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
+go back to the previous working directory. If top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
 
 g ,   
 go to the last of dir. stack whose index is the greatest   
 
 g {nth}   
-go to the nth index of dir. stack, exception is index 1 explained above, and 0 explained below   
+go to the nth index of dir. stack with behavour exception is index 1 explained above   
 
 g {directory_name}   
-go to the "directory_name" dir. For numerical name, suffix it with / to prevail over existing same index number of dir. stack
+go to the "directory_name". For numerical name, suffix it with **/** to prevail over a existing dir. stack index number   
 
-g foo \[bar baz ...\]    
+g [. | - | ,] foo \[bar baz ...\]    
 
-g . | - | ,  \[foo bar baz ...\]    
-
-likewise go to given directory namedly foo performing the first `g {directory}` usage, only now to be clearer that it may be in repetition form, withg all the rest put in dir. stack   
-it may optionally be started with . or - or , options mentioned above which'd be accomplished first (the second form)   
+likewise go to given directory named **foo**, if any extra one(s) following, they are all put in dir. stack   
+it may optionally be preceded by . or - or , which would be accomplished first   
 
 g -{n}[-[{n}]] | --{n} ...  
-remove every given nth index, by single ones or range, of dir. stack   
+remove every given dir. stack nth index either by single one(s) or range(s)   
 
 g -c   
 clean up all dir. stack   
@@ -44,18 +42,18 @@ g -r
 reverse the dir. index order and go to the last of dir. stack
 
 g ,,   
-Do nothing, made use only to refresh, update the prompt string of dir. stack which is cleaned up from any duplicate and inexistant directory   
+Do nothing. It's only made use to refresh, update the prompt string of dir. stack which is cleaned up from any duplicate and inexistant directory   
 
-g [a g option/command] -0  
+g [g command] -0  
 toggle hiding or showing the directory stack list ouput on the prompt string   
 if an optional command given, execute it first before the toggling, if it is to hide it'd still lastly be shown the list after which it'd be hidden on the next command prompt   
 so naturally, `g -0` is merely to toggle hide or show the directory stack list, not at all going into $HOME directory first   
 
 g -h[n]   
-retrieve any directory path written in the past 49 (or n number specified of) lines of command history, or if it's non directory then get its directory in which it is, so to push them repetitively in the way already described above i.e. the most recent one being the current directory    
+retrieve any directory path saved in the last 49, or n number specified, lines of command history. If it's a path to non directory object, get its directory, then push them all repetitively in the way that the most recent one being the current directory    
 
 g \<a shell command line\>   
-argument is any CLI with an executable whose argument(s) can be obtained from the dir. stack by which it is referenced   
+argument is a CLI with the first is an executable name whose argument(s) can be obtained from the dir. stack by which it is referenced   
 on purpose of get more its various selection and navigation, append // to the argument. This won't make it immediately executed, instead it'd get into readline which will be ready to do what Bash command prompt will, e.g: modify argument path or string, making use of auto completion, etc
 
 #### This'd be the most useful feature which would be perfected with its auto completion capability   
