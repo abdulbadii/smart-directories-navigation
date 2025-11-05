@@ -1,22 +1,22 @@
 # Bash smart directories navigation   
 Go or get into a directory, keeping every previous directory saved, listed neatly right off on shell   
 It must be inside ~/.bashrc to have the function g (stand for get in) working nicely, fast in Linux shell terminal provided that no other _DIRS and _DRS shell variables writing    
-So just rename function name g with whatever you like; j (jump into), or b (be in), etc    
+So just rename function name g to whatever you like; j (jump into), or b (be in), etc    
 
 # Usage   
-Note on explanation below, each usage that means: *go to a directory* (i.e. not its removal from dir. stack, etc), implies the first step *save the current directory onto top of dir. stack*, except if it's user home since do `g <ENTER>` is simpler than any work else, before the explicitly written step, and except the `g 1` usage   
+Note on explanation below, each usage that means: *go to a directory*, i.e. not its removal from dir. stack, etc, implies the first step *save the current directory onto top of dir. stack* before the following explicit steps explanation except on `g 1` (its usage informed below) and except if current working directory is user home, since a `g <ENTER>` is simpler than any else) , and   
 
 g   
 go to $HOME directory   
 
-g -   
-go back to the last dir. from where previously working directory, if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
-
 g .   
-go to directory on top of stack which is the first of dir. list (as opposed to g 1 below)     
+go to directory on top (the first) of directory stack (as opposed to g 1 below)     
 
 g 1   
-like above, go to directory pointed by top of list, but will not retain current directory    
+like above, but renouncing, i.e. not retaining, current directory    
+
+g -   
+go back to the last dir. from where previously working directory, if top of the list was not just removed, simply it'd be it and will be identical to `g .` behavour   
 
 g ,   
 go to the last of dir. stack whose index is the greatest   
